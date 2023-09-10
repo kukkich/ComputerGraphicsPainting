@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Threading;
 using System.Windows.Input;
 using Lab1.Models.Actions;
@@ -27,6 +28,7 @@ public class PointPlacementState : IInputControlState
         );
 
         _pointContext.CursorPosition = cursorPosition;
+        _app.RenderScheduled = true;
         return this;
     }
 
@@ -53,17 +55,19 @@ public class PointPlacementState : IInputControlState
     {
         var position = e.GetPosition(glControl);
 
-        _app.PushAction(new AddPointAction(_pointContext, new PointF(
-            (float)(position.X / glControl.ActualWidth) * 2 - 1,
-            -((float)(position.Y / glControl.ActualHeight) * 2 - 1)
+        _app.PushAction(new AddPointAction(
+            _pointContext,
+            new PointF(
+                (float)(position.X / glControl.ActualWidth) * 2 - 1,
+                -((float)(position.Y / glControl.ActualHeight) * 2 - 1)
         )));
-
         return this;
     }
 
     public IInputControlState OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e)
     {
         _pointContext.CursorPosition = null;
-        return new InitialState(_pointContext);
+
+        return new InitialState(_pointContext, _app);
     }
 }

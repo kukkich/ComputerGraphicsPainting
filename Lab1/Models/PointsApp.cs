@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Windows.Input;
 using System.Windows.Threading;
 using Lab1.Models.Actions;
 using Lab1.Models.Controls;
@@ -14,15 +13,15 @@ public class PointsApp
 {
     public PointContext PointContext { get; }
     public InputControl InputControl { get; }
+    public byte[] Color { get; }
 
     private readonly List<IAction> _actions;
     private readonly List<IAction> _undoActions;
 
-    private OpenGLControl _glControl;
-    private OpenGL _glContext;
-    private bool _renderScheduled = false;
+    private OpenGLControl _glControl = null!;
+    private OpenGL _glContext = null!;
+    public bool RenderScheduled = false;
     private readonly Timer _renderTimer;
-    private readonly byte[] _color;
     private readonly Dispatcher _dispatcher;
 
     public PointsApp(Dispatcher dispatcher)
@@ -33,11 +32,11 @@ public class PointsApp
         _actions = new List<IAction>(5);
         _undoActions = new List<IAction>(5);
 
-        InputControl = new InputControl(PointContext);
+        InputControl = new InputControl(this);
 
         _renderTimer = new Timer(RenderTimerCallback, null, 0, 20);
 
-        _color = new byte[] { 0, 1, 0 };
+        Color = new byte[] { 0, 1, 0 };
     }
 
     public void PushAction(IAction action)
@@ -49,6 +48,7 @@ public class PointsApp
         _undoActions.Clear();
         _actions.Add(action);
         action.Do();
+        ForceRender();
     }
 
     public void UndoAction()
@@ -80,39 +80,24 @@ public class PointsApp
         _glControl = gl;
         _glContext = args.OpenGL;
 
-        _glContext.ClearColor(0.3f, 0.3f, 0.3f, 0.3f);
+        _glContext.ClearColor(0.5f, 0.3f, 0.3f, 0.3f);
     }
 
     public void Render(OpenGLRoutedEventArgs args)
     {
-        var points = PointContext.CurrentGroup;
+        
+    }
 
-        var gl = args.OpenGL;
-        gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
-        gl.Begin(OpenGL.GL_TRIANGLE_STRIP);
-        gl.Color(_color);
-
-        foreach (var p in points)
-        {
-            gl.Vertex(p.X, p.Y);
-        }
-
-        if (PointContext.CursorPosition is not null)
-        {
-            gl.Vertex(
-                PointContext.CursorPosition.Value.X,
-                PointContext.CursorPosition.Value.Y
-            );
-        }
-
-        gl.End();
+    public void ForceRender()
+    {
+        _dispatcher.Invoke(_glControl.DoRender);
     }
 
     private void RenderTimerCallback(object state)
     {
-        if (!_renderScheduled) return;
+        if (!RenderScheduled) return;
 
         _dispatcher.Invoke(_glControl.DoRender);
-        _renderScheduled = false;
+        RenderScheduled = false;
     }
 }

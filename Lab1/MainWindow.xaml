@@ -23,12 +23,11 @@
         <!-- OpenGLControl -->
         <wpf:OpenGLControl Grid.Column="1" OpenGLDraw="OpenGLControl_OpenGLDraw"
                            OpenGLInitialized="OpenGLControl_OpenGLInitialized"
-                           Resized="OpenGLControl_Resized"
                            DrawFPS="True"
-                           MouseDown="UIElement_OnMouseDown"
                            MouseMove="OpenGLControl_MouseMove"
                            MouseLeave="UIElement_OnMouseLeave"
                            MouseEnter="UIElement_OnMouseEnter"
-                           MouseRightButtonDown="UIElement_OnMouseRightButtonDown"/>
+                           MouseRightButtonDown="UIElement_OnMouseRightButtonDown"
+                           MouseLeftButtonDown="UIElement_OnMouseLeftButtonDown"/>
     </Grid>
 </Window>

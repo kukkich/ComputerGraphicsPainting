@@ -5,37 +5,40 @@ namespace Lab1.Models.Controls;
 
 public class InputControl : IInputControlState
 {
-    private readonly PointContext _pointContext;
     private IInputControlState _state;
 
-    public InputControl(PointContext pointContext)
+    public InputControl(PointsApp app)
     {
-        _pointContext = pointContext;
-        _state = new InitialState(_pointContext);
+        _state = new InitialState(app.PointContext, app);
     }
 
     public IInputControlState OnMouseHover(OpenGLControl glControl, MouseEventArgs e)
     {
-        throw new System.NotImplementedException();
+        _state = _state.OnMouseHover(glControl, e);
+        return this;
     }
 
     public IInputControlState OnMouseLeave(OpenGLControl glControl, MouseEventArgs e)
     {
-        throw new System.NotImplementedException();
+        _state = _state.OnMouseLeave(glControl, e);
+        return this;
     }
 
     public IInputControlState OnMouseEnter(OpenGLControl glControl, MouseEventArgs e)
     {
-        throw new System.NotImplementedException();
+        _state = _state.OnMouseEnter(glControl, e);
+        return this;
     }
 
     public IInputControlState OnClick(OpenGLControl glControl, MouseButtonEventArgs e)
     {
-        throw new System.NotImplementedException();
+        _state = _state.OnClick(glControl, e);
+        return this;
     }
 
     public IInputControlState OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e)
     {
-        throw new System.NotImplementedException();
+        _state = _state.OnRightClick(glControl, e);
+        return this;
     }
 }
