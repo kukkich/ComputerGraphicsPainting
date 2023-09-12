@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Windows;
 using System.Windows.Threading;
 using Lab1.Models.Actions;
 using Lab1.Models.Controls;
@@ -9,11 +13,30 @@ using SharpGL.WPF;
 
 namespace Lab1.Models;
 
-public class PointsApp
+public class PointsApp : INotifyPropertyChanged
 {
     public PointContext PointContext { get; }
     public InputControl InputControl { get; }
-    public byte[] Color { get; }
+    public float[] Color { get; }
+    public AppState State
+    {
+        get => _state;
+        set
+        {
+            if (_state != value)
+            {
+                _state = value;
+                StateString = value.ToString();
+                OnPropertyChanged(nameof(StateString));
+            }
+        }
+    }
+
+    public string StateString { get; set; }
+
+    private AppState _state;
+
+    public event PropertyChangedEventHandler PropertyChanged;
 
     private readonly List<IAction> _actions;
     private readonly List<IAction> _undoActions;
@@ -36,27 +59,39 @@ public class PointsApp
 
         _renderTimer = new Timer(RenderTimerCallback, null, 0, 20);
 
-        Color = new byte[] { 0, 1, 0 };
+        Color = new float[] { 0.1f, 0.3f, 0.6f };
     }
 
     public void PushAction(IAction action)
     {
-        if (_actions.Count == 5)
+        if (_actions.Count == 10)
         {
             _actions.RemoveAt(0);
         }
         _undoActions.Clear();
         _actions.Add(action);
         action.Do();
-        ForceRender();
+
+        InputControl.ForceChangeState(State);
+
+        RenderScheduled = true;
+        //ForceRender();
     }
 
     public void UndoAction()
     {
+        if (_actions.Count == 0)
+        {
+            return;
+        }
         var action = _actions[^1];
         action.Undo();
         _actions.RemoveAt(_actions.Count - 1);
         _undoActions.Add(action);
+
+        InputControl.ForceChangeState(State);
+
+        RenderScheduled = true;
     }
 
     public void RedoAction()
@@ -67,10 +102,10 @@ public class PointsApp
             action.Do();
             _undoActions.RemoveAt(_undoActions.Count - 1);
             _actions.Add(action);
-        }
-        else
-        {
-            throw new InvalidOperationException();
+
+            RenderScheduled = true;
+
+            InputControl.ForceChangeState(State);
         }
     }
 
@@ -80,12 +115,109 @@ public class PointsApp
         _glControl = gl;
         _glContext = args.OpenGL;
 
-        _glContext.ClearColor(0.5f, 0.3f, 0.3f, 0.3f);
+        gl.RenderTrigger = RenderTrigger.TimerBased;
+        _glContext.ClearColor(0.4f, 0.4f, 0.5f, 0.3f);
     }
 
     public void Render(OpenGLRoutedEventArgs args)
     {
-        
+        var gl = args.OpenGL;
+        gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
+        PointF? hoveredPoint = null;
+
+        for (var i = 0; i < PointContext.PointGroups.Count; i++)
+        {
+            var group = PointContext.PointGroups[i];
+
+            gl.Begin(OpenGL.GL_TRIANGLE_FAN);
+            gl.Color(Color);
+
+            foreach (var p in group)
+            {
+                if (State == AppState.SelectingPointToEdit)
+                {
+                    var cursor = PointContext.Cursor.Position;
+                    if (MathF.Abs(cursor.X - p.X) < 5e-2
+                        && MathF.Abs(cursor.Y - p.Y) < 5e-2)
+                    {
+                        hoveredPoint = p;
+                    }
+                }
+                gl.Vertex(p.X, p.Y);
+            }
+
+            if (State == AppState.PointPlacement && i == PointContext.PointGroups.Count - 1)
+            {
+                gl.Vertex(
+                    PointContext.Cursor.Position.X,
+                    PointContext.Cursor.Position.Y
+                );
+            }
+            gl.End();
+            if (i == PointContext.PointGroups.Count - 1 && State != AppState.Initial)
+            {
+                gl.LineWidth(3);
+                gl.PointSize(5);
+
+                #region Контур
+
+                gl.Begin(OpenGL.GL_LINE_LOOP);
+                gl.Color(new float[] { 0, 0, 0, 0.1f });
+                foreach (var p in group)
+                {
+                    gl.Vertex(p.X, p.Y);
+                }
+                if (State == AppState.PointPlacement)
+                {
+                    gl.Vertex(
+                        PointContext.Cursor.Position.X,
+                        PointContext.Cursor.Position.Y
+                    );
+                }
+                gl.End();
+
+                #endregion
+
+                #region Вершины
+
+                gl.Begin(OpenGL.GL_POINTS);
+                gl.Color(new float[] { 1f, 1f, 1f, 0.6f });
+                foreach (var p in group)
+                {
+                    gl.Vertex(p.X, p.Y);
+                }
+                if (State == AppState.PointPlacement)
+                {
+                    gl.Vertex(
+                        PointContext.Cursor.Position.X,
+                        PointContext.Cursor.Position.Y
+                    );
+                }
+                gl.End();
+
+                #endregion
+
+                gl.LineWidth(1);
+                gl.PointSize(1);
+                gl.Color(Color);
+            }
+        }
+
+        if (hoveredPoint is not null)
+        {
+            gl.PointSize(9);
+            gl.Color(new float[] { 0f, 1f, 0f, 0.6f });
+
+            gl.Begin(OpenGL.GL_POINTS);
+
+            gl.Vertex(hoveredPoint.Value.X, hoveredPoint.Value.Y);
+
+            gl.End();
+
+            gl.PointSize(9);
+            gl.Color(Color);
+
+        }
     }
 
     public void ForceRender()
@@ -99,5 +231,10 @@ public class PointsApp
 
         _dispatcher.Invoke(_glControl.DoRender);
         RenderScheduled = false;
+    }
+
+    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName="")
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

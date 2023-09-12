@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using System.Threading;
+using System.Windows;
 using System.Windows.Input;
 using Lab1.Models.Actions;
 using SharpGL.WPF;
@@ -9,12 +9,10 @@ namespace Lab1.Models.Controls;
 
 public class PointPlacementState : IInputControlState
 {
-    private readonly PointContext _pointContext;
+    private PointContext PointContext => _app.PointContext;
     private readonly PointsApp _app;
-
-    public PointPlacementState(PointContext pointContext, PointsApp app)
+    public PointPlacementState(PointsApp app)
     {
-        _pointContext = pointContext;
         _app = app;
     }
 
@@ -27,14 +25,15 @@ public class PointPlacementState : IInputControlState
             -((float)(position.Y / glControl.ActualHeight) * 2 - 1)
         );
 
-        _pointContext.CursorPosition = cursorPosition;
+        PointContext.Cursor.Position = cursorPosition;
         _app.RenderScheduled = true;
         return this;
     }
 
     public IInputControlState OnMouseLeave(OpenGLControl glControl, MouseEventArgs e)
     {
-        _pointContext.CursorPosition = null;
+        // _app.PushAction(new ChangeStateAction(_app, AppState.Initial));
+        PointContext.Cursor.InCanvas = false;
         return this;
     }
 
@@ -47,27 +46,39 @@ public class PointPlacementState : IInputControlState
             -((float)(position.Y / glControl.ActualHeight) * 2 - 1)
         );
 
-        _pointContext.CursorPosition = cursorPosition;
+        // _app.PushAction(new ChangeStateAction(_app, AppState.PointPlacement));
+
+        PointContext.Cursor.InCanvas = true;
+        PointContext.Cursor.Position = cursorPosition;
         return this;
     }
 
-    public IInputControlState OnClick(OpenGLControl glControl, MouseButtonEventArgs e)
+    public IInputControlState OnLeftClick(OpenGLControl glControl, MouseButtonEventArgs e)
     {
+        // _app.State = AppState.PointPlacement;
         var position = e.GetPosition(glControl);
 
         _app.PushAction(new AddPointAction(
-            _pointContext,
+            PointContext,
             new PointF(
                 (float)(position.X / glControl.ActualWidth) * 2 - 1,
                 -((float)(position.Y / glControl.ActualHeight) * 2 - 1)
         )));
+
         return this;
     }
 
     public IInputControlState OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e)
     {
-        _pointContext.CursorPosition = null;
+        // _app.PushAction(new AddGroupAction(_app));
+        _app.PushAction(new ChangeStateAction(_app, AppState.Initial));
+        return new InitialState(_app);
+    }
 
-        return new InitialState(_pointContext, _app);
+    public IInputControlState OnUndoButton()
+    {
+        _app.UndoAction();
+
+        return this;
     }
 }

@@ -1,4 +1,6 @@
-﻿using SharpGL.WPF;
+﻿using System;
+using System.Windows;
+using SharpGL.WPF;
 using System.Windows.Input;
 using Lab1.Models.Actions;
 
@@ -6,12 +8,11 @@ namespace Lab1.Models.Controls;
 
 public class InitialState : IInputControlState
 {
-    private readonly PointContext _pointContext;
+    private PointContext PointContext => _app.PointContext;
     private readonly PointsApp _app;
 
-    public InitialState(PointContext pointContext, PointsApp app)
+    public InitialState(PointsApp app)
     {
-        _pointContext = pointContext;
         _app = app;
     }
 
@@ -30,17 +31,23 @@ public class InitialState : IInputControlState
         return this;
     }
 
-    public IInputControlState OnClick(OpenGLControl glControl, MouseButtonEventArgs e)
+    public IInputControlState OnLeftClick(OpenGLControl glControl, MouseButtonEventArgs e)
     {
-        _app.PushAction(new AddGroupAction(_pointContext));
+        _app.PushAction(new AddGroupAction(_app));
 
-        var newState = new PointPlacementState(_pointContext, _app);
+        var newState = new PointPlacementState(_app);
 
-        return newState.OnClick(glControl, e);
+        return newState.OnLeftClick(glControl, e);
     }
 
     public IInputControlState OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e)
     {
+        return this;
+    }
+
+    public IInputControlState OnUndoButton()
+    {
+        _app.UndoAction();
         return this;
     }
 }

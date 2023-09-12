@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:Lab1"
         xmlns:wpf="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="1300">
+        Title="MainWindow" Height="800" Width="1300"
+        KeyDown="MainWindow_OnKeyDown">
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
@@ -18,16 +20,19 @@
             <Button Content="Кнопка 1" Margin="10"/>
             <Button Content="Кнопка 2" Margin="10"/>
             <Button Content="Кнопка 3" Margin="10"/>
+            <TextBlock Text="{Binding Path=PointsApp.StateString}" Margin="10"/>
         </StackPanel>
 
         <!-- OpenGLControl -->
         <wpf:OpenGLControl Grid.Column="1" OpenGLDraw="OpenGLControl_OpenGLDraw"
                            OpenGLInitialized="OpenGLControl_OpenGLInitialized"
+                           Resized="OpenGLControl_Resized"
                            DrawFPS="True"
                            MouseMove="OpenGLControl_MouseMove"
                            MouseLeave="UIElement_OnMouseLeave"
                            MouseEnter="UIElement_OnMouseEnter"
+                           MouseLeftButtonDown="UIElement_OnMouseLeftButtonDown"
                            MouseRightButtonDown="UIElement_OnMouseRightButtonDown"
-                           MouseLeftButtonDown="UIElement_OnMouseLeftButtonDown"/>
+                           />
     </Grid>
 </Window>

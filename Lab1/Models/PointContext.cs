@@ -8,7 +8,7 @@ public class PointContext
 {
     public IReadOnlyList<IReadOnlyList<PointF>> PointGroups => _pointGroups;
     public IReadOnlyList<PointF> CurrentGroup => _pointGroups[_currentGroupIndex];
-    public PointF? CursorPosition { get; set; }
+    public Cursor Cursor { get; set; }
 
     private int _currentGroupIndex;
     private readonly List<List<PointF>> _pointGroups;
@@ -16,6 +16,7 @@ public class PointContext
     public PointContext()
     {
         _pointGroups = new List<List<PointF>> {new()};
+        Cursor = new Cursor();
     }
 
     public void AddGroup()

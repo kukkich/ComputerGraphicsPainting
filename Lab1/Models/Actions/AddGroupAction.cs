@@ -2,22 +2,31 @@
 
 public class AddGroupAction : OneTimeAction
 {
-    private readonly PointContext _pointsContext;
+    private readonly PointsApp _app;
+    private PointContext PointsContext => _app.PointContext;
+    private AppState _oldState;
 
-    public AddGroupAction(PointContext pointsContext)
+    public AddGroupAction(PointsApp app)
     {
-        _pointsContext = pointsContext;
+        _app = app;
     }
 
     public override void Do()
     {
         base.Do();
-        _pointsContext.AddGroup();
+
+        _oldState = _app.State;
+        _app.State = AppState.PointPlacement;
+
+        PointsContext.AddGroup();
     }
 
     public override void Undo()
     {
         base.Undo();
-        _pointsContext.RemoveLastGroup();
+
+        _app.State = _oldState;
+
+        PointsContext.RemoveLastGroup();
     }
 }

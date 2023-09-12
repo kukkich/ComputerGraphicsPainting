@@ -8,6 +8,8 @@ public interface IInputControlState
     IInputControlState OnMouseHover(OpenGLControl glControl, MouseEventArgs e);
     IInputControlState OnMouseLeave(OpenGLControl glControl, MouseEventArgs e);
     IInputControlState OnMouseEnter(OpenGLControl glControl, MouseEventArgs e);
-    IInputControlState OnClick(OpenGLControl glControl, MouseButtonEventArgs e);
+    IInputControlState OnLeftClick(OpenGLControl glControl, MouseButtonEventArgs e);
     IInputControlState OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e);
+
+    IInputControlState OnUndoButton();
 }
