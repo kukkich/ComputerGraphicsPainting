@@ -17,37 +17,37 @@ public class InputControl : IInputControlState
 
     public IInputControlState OnMouseHover(OpenGLControl glControl, MouseEventArgs e)
     {
-        _state = _state.OnMouseHover(glControl, e);
+        _state.OnMouseHover(glControl, e);
         return this;
     }
 
     public IInputControlState OnMouseLeave(OpenGLControl glControl, MouseEventArgs e)
     {
-        _state = _state.OnMouseLeave(glControl, e);
+        _state.OnMouseLeave(glControl, e);
         return this;
     }
 
     public IInputControlState OnMouseEnter(OpenGLControl glControl, MouseEventArgs e)
     {
-        _state = _state.OnMouseEnter(glControl, e);
+        _state.OnMouseEnter(glControl, e);
         return this;
     }
 
     public IInputControlState OnLeftClick(OpenGLControl glControl, MouseButtonEventArgs e)
     {
-        _state = _state.OnLeftClick(glControl, e);
+        _state.OnLeftClick(glControl, e);
         return this;
     }
 
     public IInputControlState OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e)
     {
-        _state = _state.OnRightClick(glControl, e);
+        _state.OnRightClick(glControl, e);
         return this;
     }
 
     public IInputControlState OnUndoButton()
     {
-        _state = _state.OnUndoButton();
+        _state.OnUndoButton();
         return this;
     }
 
