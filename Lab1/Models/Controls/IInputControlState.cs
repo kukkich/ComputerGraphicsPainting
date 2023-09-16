@@ -5,11 +5,11 @@ namespace Lab1.Models.Controls;
 
 public interface IInputControlState
 {
-    IInputControlState OnMouseHover(OpenGLControl glControl, MouseEventArgs e);
-    IInputControlState OnMouseLeave(OpenGLControl glControl, MouseEventArgs e);
-    IInputControlState OnMouseEnter(OpenGLControl glControl, MouseEventArgs e);
-    IInputControlState OnLeftClick(OpenGLControl glControl, MouseButtonEventArgs e);
-    IInputControlState OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e);
-
-    IInputControlState OnUndoButton();
+    void OnMouseHover(OpenGLControl glControl, MouseEventArgs e);
+    void OnMouseLeave(OpenGLControl glControl, MouseEventArgs e);
+    void OnMouseEnter(OpenGLControl glControl, MouseEventArgs e);
+    void OnLeftClick(OpenGLControl glControl, MouseButtonEventArgs e);
+    void OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e);
+    void OnUndoButton();
+    void OnRedoButton();
 }

@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Windows;
 using System.Windows.Threading;
 using Lab1.Models.Actions;
 using Lab1.Models.Controls;
+using Lab1.ViewModels;
 using SharpGL;
 using SharpGL.WPF;
 
 namespace Lab1.Models;
 
-public class PointsApp : INotifyPropertyChanged
+public class PointsApp
 {
     public PointContext PointContext { get; }
     public InputControl InputControl { get; }
@@ -23,20 +21,15 @@ public class PointsApp : INotifyPropertyChanged
         get => _state;
         set
         {
-            if (_state != value)
-            {
-                _state = value;
-                StateString = value.ToString();
-                OnPropertyChanged(nameof(StateString));
-            }
+            _state = value;
+            StateString = value.ToString();
+            _view.State = StateString;
         }
     }
 
     public string StateString { get; set; }
 
     private AppState _state;
-
-    public event PropertyChangedEventHandler PropertyChanged;
 
     private readonly List<IAction> _actions;
     private readonly List<IAction> _undoActions;
@@ -46,18 +39,20 @@ public class PointsApp : INotifyPropertyChanged
     public bool RenderScheduled = false;
     private readonly Timer _renderTimer;
     private readonly Dispatcher _dispatcher;
+    private readonly PointsAppView _view;
 
-    public PointsApp(Dispatcher dispatcher)
+    public PointsApp(Dispatcher dispatcher, PointsAppView view)
     {
         _dispatcher = dispatcher;
+        _view = view;
 
-        PointContext = new PointContext();
+        PointContext = new PointContext(view);
         _actions = new List<IAction>(5);
         _undoActions = new List<IAction>(5);
 
         InputControl = new InputControl(this);
 
-        _renderTimer = new Timer(RenderTimerCallback, null, 0, 20);
+        _renderTimer = new Timer(RenderTimerCallback!, null, 0, 20);
 
         Color = new float[] { 0.1f, 0.3f, 0.6f };
     }
@@ -75,7 +70,6 @@ public class PointsApp : INotifyPropertyChanged
         InputControl.ForceChangeState(State);
 
         RenderScheduled = true;
-        //ForceRender();
     }
 
     public void UndoAction()
@@ -103,9 +97,9 @@ public class PointsApp : INotifyPropertyChanged
             _undoActions.RemoveAt(_undoActions.Count - 1);
             _actions.Add(action);
 
-            RenderScheduled = true;
-
             InputControl.ForceChangeState(State);
+
+            RenderScheduled = true;
         }
     }
 
@@ -125,14 +119,14 @@ public class PointsApp : INotifyPropertyChanged
         gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
         PointF? hoveredPoint = null;
 
-        for (var i = 0; i < PointContext.PointGroups.Count; i++)
+        for (var i = 0; i < PointContext.Groups.Count; i++)
         {
-            var group = PointContext.PointGroups[i];
+            var group = PointContext.Groups[i];
 
             gl.Begin(OpenGL.GL_TRIANGLE_FAN);
             gl.Color(Color);
 
-            foreach (var p in group)
+            foreach (var p in group.Points)
             {
                 if (State == AppState.SelectingPointToEdit)
                 {
@@ -146,7 +140,7 @@ public class PointsApp : INotifyPropertyChanged
                 gl.Vertex(p.X, p.Y);
             }
 
-            if (State == AppState.PointPlacement && i == PointContext.PointGroups.Count - 1)
+            if (State == AppState.PointPlacement && i == PointContext.Groups.Count - 1)
             {
                 gl.Vertex(
                     PointContext.Cursor.Position.X,
@@ -154,7 +148,7 @@ public class PointsApp : INotifyPropertyChanged
                 );
             }
             gl.End();
-            if (i == PointContext.PointGroups.Count - 1 && State != AppState.Initial)
+            if (i == PointContext.Groups.Count - 1 && State != AppState.Initial)
             {
                 gl.LineWidth(3);
                 gl.PointSize(5);
@@ -163,7 +157,7 @@ public class PointsApp : INotifyPropertyChanged
 
                 gl.Begin(OpenGL.GL_LINE_LOOP);
                 gl.Color(new float[] { 0, 0, 0, 0.1f });
-                foreach (var p in group)
+                foreach (var p in group.Points)
                 {
                     gl.Vertex(p.X, p.Y);
                 }
@@ -182,7 +176,7 @@ public class PointsApp : INotifyPropertyChanged
 
                 gl.Begin(OpenGL.GL_POINTS);
                 gl.Color(new float[] { 1f, 1f, 1f, 0.6f });
-                foreach (var p in group)
+                foreach (var p in group.Points)
                 {
                     gl.Vertex(p.X, p.Y);
                 }
@@ -231,10 +225,5 @@ public class PointsApp : INotifyPropertyChanged
 
         _dispatcher.Invoke(_glControl.DoRender);
         RenderScheduled = false;
-    }
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName="")
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

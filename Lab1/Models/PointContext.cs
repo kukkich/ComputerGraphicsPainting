@@ -1,45 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using Lab1.ViewModels;
 
 namespace Lab1.Models;
 
 public class PointContext
 {
-    public IReadOnlyList<IReadOnlyList<PointF>> PointGroups => _pointGroups;
-    public IReadOnlyList<PointF> CurrentGroup => _pointGroups[_currentGroupIndex];
+    public List<PointsGroup> Groups => _groups;
+    public PointsGroup CurrentGroup => _groups[_currentGroupIndex];
     public Cursor Cursor { get; set; }
 
     private int _currentGroupIndex;
-    private readonly List<List<PointF>> _pointGroups;
+    private readonly List<PointsGroup> _groups;
+    private readonly PointsAppView _view;
 
-    public PointContext()
+    public PointContext(PointsAppView view)
     {
-        _pointGroups = new List<List<PointF>> {new()};
+        _currentGroupIndex = -1;
+        _groups = new List<PointsGroup>();
+
+        _view = view;
+
         Cursor = new Cursor();
     }
 
     public void AddGroup()
     {
-        _pointGroups.Add(new List<PointF>());
+        _groups.Add(new PointsGroup());
         _currentGroupIndex++;
+
+        _view.PointsGroup.Add(
+            new PointsGroupView(
+                CurrentGroup,
+                _currentGroupIndex
+            )
+        );
+        _view.CurrentGroupIndex++;
     }
 
     public void AddPoint(PointF point)
     {
-        _pointGroups[_currentGroupIndex].Add(point);
+        _groups[_currentGroupIndex].Points.Add(point);
+        _view.PointsGroup[_currentGroupIndex].PointsCount++;
     }
 
-    public List<PointF> RemoveLastGroup()
+    public PointsGroup RemoveLastGroup()
     {
-        var removed = _pointGroups[_currentGroupIndex];
+        var removed = _groups[_currentGroupIndex];
 
-        _pointGroups.RemoveAt(_currentGroupIndex);
+        _groups.RemoveAt(_currentGroupIndex);
+        _view.PointsGroup.RemoveAt(_currentGroupIndex);
+
         _currentGroupIndex--;
+        _view.CurrentGroupIndex--;
+
         if (_currentGroupIndex < 0)
         {
             _currentGroupIndex = 0;
-            _pointGroups.Add(new List<PointF>());
+            _groups.Add(new());
         }
 
         return removed;
@@ -47,7 +66,8 @@ public class PointContext
 
     public void RemoveLastPoint()
     {
-        if (CurrentGroup.Count == 0)
+        var totalPoints = CurrentGroup.Points.Count;
+        if (totalPoints == 0)
         {
             if (_currentGroupIndex == 0)
             {
@@ -55,6 +75,8 @@ public class PointContext
             }
             RemoveLastGroup();
         }
-        _pointGroups[_currentGroupIndex].RemoveAt(CurrentGroup.Count - 1);
+
+        _groups[_currentGroupIndex].Points.RemoveAt(totalPoints - 1);
+        _view.PointsGroup[_currentGroupIndex].PointsCount--;
     }
 }

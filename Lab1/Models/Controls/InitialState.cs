@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Drawing;
 using SharpGL.WPF;
 using System.Windows.Input;
 using Lab1.Models.Actions;
@@ -16,38 +15,43 @@ public class InitialState : IInputControlState
         _app = app;
     }
 
-    public IInputControlState OnMouseHover(OpenGLControl glControl, MouseEventArgs e)
+    public void OnMouseHover(OpenGLControl glControl, MouseEventArgs e)
     {
-        return this;
     }
 
-    public IInputControlState OnMouseLeave(OpenGLControl glControl, MouseEventArgs e)
+    public void OnMouseLeave(OpenGLControl glControl, MouseEventArgs e)
     {
-        return this;
     }
 
-    public IInputControlState OnMouseEnter(OpenGLControl glControl, MouseEventArgs e)
+    public void OnMouseEnter(OpenGLControl glControl, MouseEventArgs e)
     {
-        return this;
     }
 
-    public IInputControlState OnLeftClick(OpenGLControl glControl, MouseButtonEventArgs e)
+    public void OnLeftClick(OpenGLControl glControl, MouseButtonEventArgs e)
     {
         _app.PushAction(new AddGroupAction(_app));
 
-        var newState = new PointPlacementState(_app);
+        var position = e.GetPosition(glControl);
 
-        return newState.OnLeftClick(glControl, e);
+        _app.PushAction(new AddPointAction(
+            PointContext,
+            new PointF(
+                (float)(position.X / glControl.ActualWidth) * 2 - 1,
+                -((float)(position.Y / glControl.ActualHeight) * 2 - 1)
+            )));
     }
 
-    public IInputControlState OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e)
+    public void OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e)
     {
-        return this;
     }
 
-    public IInputControlState OnUndoButton()
+    public void OnUndoButton()
     {
         _app.UndoAction();
-        return this;
+    }
+
+    public void OnRedoButton()
+    {
+        _app.RedoAction();
     }
 }

@@ -17,10 +17,19 @@
 
         <!-- Боковая панель -->
         <StackPanel Grid.Column="0" Background="LightGray">
-            <Button Content="Кнопка 1" Margin="10"/>
-            <Button Content="Кнопка 2" Margin="10"/>
             <Button Content="Кнопка 3" Margin="10"/>
-            <TextBlock Text="{Binding Path=PointsApp.StateString}" Margin="10"/>
+            <TextBlock Text="{Binding Path= AppView.State}" Margin="10"/>
+            <ListView SelectionChanged="PointsGroups_OnSelectionChanged" Name="PointsGroups" ItemsSource="{Binding AppView.PointsGroup}" >
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Index}">Номер</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=PointsCount}">Точек</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Color[0]}">Red</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Color[1]}">Green</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Color[2]}">Blue</GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
         </StackPanel>
 
         <!-- OpenGLControl -->

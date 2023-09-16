@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Lab1.Models;
 using Lab1.Models.Controls;
+using Lab1.ViewModels;
 using SharpGL;
 using SharpGL.WPF;
 
@@ -12,13 +14,18 @@ namespace Lab1
     public partial class MainWindow : Window
     {
         public PointsApp PointsApp { get; }
+        public PointsAppView AppView { get; }
         public PointContext PointContext => PointsApp.PointContext;
         public InputControl InputControl => PointsApp.InputControl;
 
         public MainWindow()
         {
             InitializeComponent();
-            PointsApp = new PointsApp(Dispatcher);
+
+            AppView = new PointsAppView();
+            PointsApp = new PointsApp(Dispatcher, AppView);
+
+
             DataContext = this;
         }
 
@@ -66,9 +73,18 @@ namespace Lab1
         {
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.Z)
             {
-                // MessageBox.Show("нажали ctrl + Z");
                 PointsApp.InputControl.OnUndoButton();
             }
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control && e.Key == Key.Y)
+            {
+                PointsApp.InputControl.OnRedoButton();
+            }
+        }
+
+        private void PointsGroups_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedItem = (PointsGroupView)e.AddedItems[0];
+            MessageBox.Show(selectedItem.Index.ToString());
         }
     }
 }
