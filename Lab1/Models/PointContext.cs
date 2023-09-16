@@ -8,7 +8,10 @@ namespace Lab1.Models;
 public class PointContext
 {
     public List<PointsGroup> Groups => _groups;
-    public PointsGroup CurrentGroup => _groups[_currentGroupIndex];
+    public PointsGroup? CurrentGroup => _currentGroupIndex < 0 
+        ? null 
+        : _groups[_currentGroupIndex];
+
     public Cursor Cursor { get; set; }
 
     private int _currentGroupIndex;

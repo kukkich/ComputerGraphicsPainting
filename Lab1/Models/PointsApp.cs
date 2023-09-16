@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Threading;
 using System.Windows.Threading;
 using Lab1.Models.Actions;
@@ -74,10 +75,8 @@ public class PointsApp
 
     public void UndoAction()
     {
-        if (_actions.Count == 0)
-        {
-            return;
-        }
+        if (_actions.Count == 0) return;
+
         var action = _actions[^1];
         action.Undo();
         _actions.RemoveAt(_actions.Count - 1);
@@ -90,17 +89,16 @@ public class PointsApp
 
     public void RedoAction()
     {
-        if (_undoActions.Count > 0)
-        {
-            var action = _undoActions[^1];
-            action.Do();
-            _undoActions.RemoveAt(_undoActions.Count - 1);
-            _actions.Add(action);
+        if (_undoActions.Count <= 0) return;
+        
+        var action = _undoActions[^1];
+        action.Do();
+        _undoActions.RemoveAt(_undoActions.Count - 1);
+        _actions.Add(action);
 
-            InputControl.ForceChangeState(State);
+        InputControl.ForceChangeState(State);
 
-            RenderScheduled = true;
-        }
+        RenderScheduled = true;
     }
 
     // ReSharper disable once InconsistentNaming
@@ -119,83 +117,104 @@ public class PointsApp
         gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
         PointF? hoveredPoint = null;
 
-        for (var i = 0; i < PointContext.Groups.Count; i++)
+        void DrawGroup(PointsGroup group)
         {
-            var group = PointContext.Groups[i];
-
-            gl.Begin(OpenGL.GL_TRIANGLE_FAN);
-            gl.Color(Color);
-
             foreach (var p in group.Points)
             {
-                if (State == AppState.SelectingPointToEdit)
-                {
-                    var cursor = PointContext.Cursor.Position;
-                    if (MathF.Abs(cursor.X - p.X) < 5e-2
-                        && MathF.Abs(cursor.Y - p.Y) < 5e-2)
-                    {
-                        hoveredPoint = p;
-                    }
-                }
                 gl.Vertex(p.X, p.Y);
             }
+        }
 
-            if (State == AppState.PointPlacement && i == PointContext.Groups.Count - 1)
+        void DrawCursor()
+        {
+            gl.Vertex(
+                PointContext.Cursor.Position.X,
+                PointContext.Cursor.Position.Y
+            );
+        }
+
+        void DrawOutline(PointsGroup pointsGroup)
+        {
+            // TODO Удалить когда PointContext.CurrentGroup
+            // станет возвращать выделенную группу
+            // и null если не выделена
+
+            if (State == AppState.Initial) return;
+
+            gl.LineWidth(3);
+            gl.PointSize(5);
+
+            #region Контур
+
+            gl.Begin(OpenGL.GL_LINE_LOOP);
+            gl.Color(new float[] {0, 0, 0, 0.1f});
+            DrawGroup(pointsGroup);
+            if (State == AppState.PointPlacement)
             {
-                gl.Vertex(
-                    PointContext.Cursor.Position.X,
-                    PointContext.Cursor.Position.Y
-                );
+                DrawCursor();
+            }
+
+            gl.End();
+
+            #endregion
+
+            #region Вершины
+
+            gl.Begin(OpenGL.GL_POINTS);
+            gl.Color(new float[] {1f, 1f, 1f, 0.6f});
+            DrawGroup(pointsGroup);
+
+            if (State == AppState.PointPlacement)
+            {
+                DrawCursor();
+            }
+
+            gl.End();
+
+            #endregion
+
+            gl.LineWidth(1);
+            gl.PointSize(1);
+            gl.Color(Color);
+        }
+
+        foreach (var group in PointContext.Groups.Where(x => x != PointContext.CurrentGroup))
+        {
+            gl.Begin(OpenGL.GL_TRIANGLE_FAN);
+            gl.Color(group.Color);
+
+            // Для выделения близкой точки
+            // if (State == AppState.SelectingPointToEdit)
+            // {
+            //     var cursor = PointContext.Cursor.Position;
+            //     if (MathF.Abs(cursor.X - p.X) < 5e-2
+            //         && MathF.Abs(cursor.Y - p.Y) < 5e-2)
+            //     {
+            //         hoveredPoint = p;
+            //     }
+            // }
+
+            DrawGroup(group);
+            
+            gl.End();
+        }
+
+        var currentGroup = PointContext.CurrentGroup;
+        if (currentGroup is not null)
+        {
+            gl.Begin(OpenGL.GL_TRIANGLE_FAN);
+            gl.Color(currentGroup.Color);
+
+            DrawGroup(currentGroup);
+            if (State == AppState.PointPlacement && currentGroup == PointContext.CurrentGroup)
+            {
+                DrawCursor();
             }
             gl.End();
-            if (i == PointContext.Groups.Count - 1 && State != AppState.Initial)
-            {
-                gl.LineWidth(3);
-                gl.PointSize(5);
 
-                #region Контур
-
-                gl.Begin(OpenGL.GL_LINE_LOOP);
-                gl.Color(new float[] { 0, 0, 0, 0.1f });
-                foreach (var p in group.Points)
-                {
-                    gl.Vertex(p.X, p.Y);
-                }
-                if (State == AppState.PointPlacement)
-                {
-                    gl.Vertex(
-                        PointContext.Cursor.Position.X,
-                        PointContext.Cursor.Position.Y
-                    );
-                }
-                gl.End();
-
-                #endregion
-
-                #region Вершины
-
-                gl.Begin(OpenGL.GL_POINTS);
-                gl.Color(new float[] { 1f, 1f, 1f, 0.6f });
-                foreach (var p in group.Points)
-                {
-                    gl.Vertex(p.X, p.Y);
-                }
-                if (State == AppState.PointPlacement)
-                {
-                    gl.Vertex(
-                        PointContext.Cursor.Position.X,
-                        PointContext.Cursor.Position.Y
-                    );
-                }
-                gl.End();
-
-                #endregion
-
-                gl.LineWidth(1);
-                gl.PointSize(1);
-                gl.Color(Color);
-            }
+            DrawOutline(currentGroup);
         }
+
 
         if (hoveredPoint is not null)
         {
@@ -226,4 +245,6 @@ public class PointsApp
         _dispatcher.Invoke(_glControl.DoRender);
         RenderScheduled = false;
     }
+
+    
 }
