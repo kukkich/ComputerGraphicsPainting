@@ -65,4 +65,15 @@ public abstract class BaseState : IInputControlState
         }
         App.PushAction(new ChangeStateAction(App, AppState.SelectingPointToEdit));
     }
+
+    public void OnCurrentGroupChanged(int newGroupIndex)
+    {
+        if (App.State is not (AppState.Initial or AppState.PointPlacement))
+        {
+            throw new InvalidOperationException("Закончите редактирование точки");
+        }
+
+        App.PushAction(new SelectGroupAction(App, newGroupIndex));
+        App.ForceRender();
+    }
 }

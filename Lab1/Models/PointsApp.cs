@@ -17,7 +17,6 @@ public class PointsApp
 {
     public PointContext PointContext { get; }
     public InputControl InputControl { get; }
-    public float[] Color { get; }
 
     public AppState State
     {

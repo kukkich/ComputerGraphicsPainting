@@ -56,6 +56,11 @@ public class InputControl : IInputControlState
         _state.OnEditModeToggle();
     }
 
+    public void OnCurrentGroupChanged(int newGroupIndex)
+    {
+        _state.OnCurrentGroupChanged(newGroupIndex);
+    }
+
     public void ForceChangeState(AppState state)
     {
         _state = state switch

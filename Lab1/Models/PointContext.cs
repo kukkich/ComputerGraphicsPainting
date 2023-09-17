@@ -8,9 +8,10 @@ namespace Lab1.Models;
 public class PointContext
 {
     public List<PointsGroup> Groups => _groups;
-    public PointsGroup? CurrentGroup => _currentGroupIndex < 0 
+    public PointsGroup? CurrentGroup => CurrentGroupIndex < 0 
         ? null 
-        : _groups[_currentGroupIndex];
+        : _groups[CurrentGroupIndex];
+    public int CurrentGroupIndex { get; private set; }
 
     public Cursor Cursor { get; set; }
     public int? ClosestPointIndex { get; private set; }
@@ -29,13 +30,12 @@ public class PointContext
 
     public int? EditingPointIndex { get; private set; }
 
-    private int _currentGroupIndex;
     private readonly List<PointsGroup> _groups;
     private readonly PointsAppView _view;
 
     public PointContext(PointsAppView view)
     {
-        _currentGroupIndex = -1;
+        CurrentGroupIndex = -1;
         _groups = new List<PointsGroup>();
 
         _view = view;
@@ -46,36 +46,36 @@ public class PointContext
     public void AddGroup()
     {
         _groups.Add(new PointsGroup());
-        _currentGroupIndex++;
+        CurrentGroupIndex = _groups.Count - 1;
 
         _view.PointsGroup.Add(
             new PointsGroupView(
                 CurrentGroup!,
-                _currentGroupIndex
+                CurrentGroupIndex
             )
         );
-        _view.CurrentGroupIndex++;
+        _view.CurrentGroupIndex = CurrentGroupIndex;
     }
 
     public void AddPoint(PointF point)
     {
-        _groups[_currentGroupIndex].Points.Add(point);
-        _view.PointsGroup[_currentGroupIndex].PointsCount++;
+        _groups[CurrentGroupIndex].Points.Add(point);
+        _view.PointsGroup[CurrentGroupIndex].PointsCount++;
     }
 
     public PointsGroup RemoveLastGroup()
     {
-        var removed = _groups[_currentGroupIndex];
+        var removed = _groups[CurrentGroupIndex];
 
-        _groups.RemoveAt(_currentGroupIndex);
-        _view.PointsGroup.RemoveAt(_currentGroupIndex);
+        _groups.RemoveAt(CurrentGroupIndex);
+        _view.PointsGroup.RemoveAt(CurrentGroupIndex);
 
-        _currentGroupIndex--;
+        CurrentGroupIndex--;
         _view.CurrentGroupIndex--;
 
-        if (_currentGroupIndex < 0)
+        if (CurrentGroupIndex < 0)
         {
-            _currentGroupIndex = 0;
+            CurrentGroupIndex = 0;
             _groups.Add(new());
         }
 
@@ -87,15 +87,15 @@ public class PointContext
         var totalPoints = CurrentGroup.Points.Count;
         if (totalPoints == 0)
         {
-            if (_currentGroupIndex == 0)
+            if (CurrentGroupIndex == 0)
             {
                 throw new InvalidOperationException("Was no points");
             }
             RemoveLastGroup();
         }
 
-        _groups[_currentGroupIndex].Points.RemoveAt(totalPoints - 1);
-        _view.PointsGroup[_currentGroupIndex].PointsCount--;
+        _groups[CurrentGroupIndex].Points.RemoveAt(totalPoints - 1);
+        _view.PointsGroup[CurrentGroupIndex].PointsCount--;
     }
 
     public void SelectClosestPointInCurrentGroup()
@@ -159,5 +159,16 @@ public class PointContext
                 """
             );
         }
+    }
+
+    public void SelectGroup(int index)
+    {
+        if (index < 0 || index >= Groups.Count)
+        {
+            throw new ArgumentOutOfRangeException();
+        }
+
+        CurrentGroupIndex = index;
+        _view.CurrentGroupIndex = index;
     }
 }

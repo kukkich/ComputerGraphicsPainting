@@ -13,4 +13,5 @@ public interface IInputControlState
     void OnUndoButton();
     void OnRedoButton();
     void OnEditModeToggle();
+    void OnCurrentGroupChanged(int newGroupIndex);
 }

@@ -26,6 +26,11 @@ public class SelectingPointToEditState : BaseState
         }
     }
 
+    public override void OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e)
+    {
+        App.PushAction(new ChangeStateAction(App, AppState.Initial));
+    }
+
     public override void OnEditModeToggle()
     {
         App.PushAction(new ChangeStateAction(App, AppState.PointPlacement));

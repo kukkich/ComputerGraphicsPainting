@@ -23,10 +23,10 @@ namespace Lab1
         {
             InitializeComponent();
 
-            AppView = new PointsAppView();
+            AppView = new PointsAppView(GroupsTable);
             PointsApp = new PointsApp(Dispatcher, AppView);
 
-
+            
             DataContext = this;
         }
 
@@ -98,8 +98,11 @@ namespace Lab1
 
         private void PointsGroups_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (e.AddedItems.Count == 0) return;
+
             var selectedItem = (PointsGroupView)e.AddedItems[0]!;
-            MessageBox.Show(selectedItem.Index.ToString());
+            PointsApp.InputControl.OnCurrentGroupChanged(selectedItem.Index);
+            // MessageBox.Show(selectedItem.Index.ToString());
         }
     }
 }

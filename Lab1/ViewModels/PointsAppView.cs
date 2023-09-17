@@ -1,11 +1,14 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Controls;
+using Lab1.Models;
 
 namespace Lab1.ViewModels;
 
 public class PointsAppView : INotifyPropertyChanged
 {
+
     public ObservableCollection<PointsGroupView> PointsGroup
     {
         get => _pointsGroup; 
@@ -23,6 +26,15 @@ public class PointsAppView : INotifyPropertyChanged
         set
         {
             _currentGroupIndex = value;
+            if (value < 0)
+            {
+                _groupsTable.UnselectAll();
+            }
+            else
+            {
+                _groupsTable.SelectedIndex = value;
+            }
+
             OnPropertyChanged();
         }
     }
@@ -45,14 +57,21 @@ public class PointsAppView : INotifyPropertyChanged
         set
         {
             _state = value;
+            if (value == nameof(AppState.Initial))
+            {
+                CurrentGroupIndex = -1;
+            }
             OnPropertyChanged();
         }
     }
     private string _state = "";
 
+    private readonly ListView _groupsTable;
 
-    public PointsAppView()
+    public PointsAppView(ListView groupsTable)
     {
+        _groupsTable = groupsTable;
+
         _pointsGroup = new ObservableCollection<PointsGroupView>();
         _pointsGroup.CollectionChanged += ( _, _) 
             => OnPropertyChanged(nameof(PointsGroup));
