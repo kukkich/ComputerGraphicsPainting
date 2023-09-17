@@ -1,32 +1,25 @@
 ﻿namespace Lab1.Models.Actions;
 
-public class AddGroupAction : OneTimeAction
+public class AddGroupAction : PreviousStateMemorizedAction
 {
-    private readonly PointsApp _app;
-    private PointContext PointsContext => _app.PointContext;
-    private AppState _oldState;
+    private PointContext PointsContext => App.PointContext;
 
-    public AddGroupAction(PointsApp app)
-    {
-        _app = app;
-    }
+    public AddGroupAction(PointsApp app) 
+        : base(app)
+        { }
 
     public override void Do()
     {
         base.Do();
-
-        _oldState = _app.State;
-        _app.State = AppState.PointPlacement;
-
+        
+        App.State = AppState.PointPlacement;
         PointsContext.AddGroup();
     }
 
     public override void Undo()
     {
         base.Undo();
-
-        _app.State = _oldState;
-
+        
         PointsContext.RemoveLastGroup();
     }
 }

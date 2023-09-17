@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows;
 
 namespace Lab1.Models.Actions;
 

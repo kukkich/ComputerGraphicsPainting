@@ -9,6 +9,7 @@ using Lab1.Models.Controls;
 using Lab1.ViewModels;
 using SharpGL;
 using SharpGL.WPF;
+// ReSharper disable PossibleMultipleEnumeration
 
 namespace Lab1.Models;
 
@@ -17,18 +18,16 @@ public class PointsApp
     public PointContext PointContext { get; }
     public InputControl InputControl { get; }
     public float[] Color { get; }
+
     public AppState State
     {
         get => _state;
         set
         {
             _state = value;
-            StateString = value.ToString();
-            _view.State = StateString;
+            _view.State = value.ToString();
         }
     }
-
-    public string StateString { get; set; }
 
     private AppState _state;
 
@@ -37,9 +36,11 @@ public class PointsApp
 
     private OpenGLControl _glControl = null!;
     private OpenGL _glContext = null!;
-    public bool RenderScheduled = false;
-    private readonly Timer _renderTimer;
     private readonly Dispatcher _dispatcher;
+    
+    private bool _renderScheduled = false;
+    private readonly Timer _renderTimer;
+
     private readonly PointsAppView _view;
 
     public PointsApp(Dispatcher dispatcher, PointsAppView view)
@@ -54,8 +55,6 @@ public class PointsApp
         InputControl = new InputControl(this);
 
         _renderTimer = new Timer(RenderTimerCallback!, null, 0, 20);
-
-        Color = new float[] { 0.1f, 0.3f, 0.6f };
     }
 
     public void PushAction(IAction action)
@@ -70,7 +69,7 @@ public class PointsApp
 
         InputControl.ForceChangeState(State);
 
-        RenderScheduled = true;
+        _renderScheduled = true;
     }
 
     public void UndoAction()
@@ -84,13 +83,13 @@ public class PointsApp
 
         InputControl.ForceChangeState(State);
 
-        RenderScheduled = true;
+        _renderScheduled = true;
     }
 
     public void RedoAction()
     {
         if (_undoActions.Count <= 0) return;
-        
+
         var action = _undoActions[^1];
         action.Do();
         _undoActions.RemoveAt(_undoActions.Count - 1);
@@ -98,7 +97,7 @@ public class PointsApp
 
         InputControl.ForceChangeState(State);
 
-        RenderScheduled = true;
+        _renderScheduled = true;
     }
 
     // ReSharper disable once InconsistentNaming
@@ -113,13 +112,12 @@ public class PointsApp
 
     public void Render(OpenGLRoutedEventArgs args)
     {
-        var gl = args.OpenGL;
+        OpenGL gl = args.OpenGL;
         gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
-        PointF? hoveredPoint = null;
 
-        void DrawGroup(PointsGroup group)
+        void DrawPoints(IEnumerable<PointF> points)
         {
-            foreach (var p in group.Points)
+            foreach (var p in points)
             {
                 gl.Vertex(p.X, p.Y);
             }
@@ -133,7 +131,7 @@ public class PointsApp
             );
         }
 
-        void DrawOutline(PointsGroup pointsGroup)
+        void DrawOutline(IEnumerable<PointF> points)
         {
             // TODO Удалить когда PointContext.CurrentGroup
             // станет возвращать выделенную группу
@@ -147,8 +145,8 @@ public class PointsApp
             #region Контур
 
             gl.Begin(OpenGL.GL_LINE_LOOP);
-            gl.Color(new float[] {0, 0, 0, 0.1f});
-            DrawGroup(pointsGroup);
+            gl.Color(new float[] { 0, 0, 0, 0.1f });
+            DrawPoints(points);
             if (State == AppState.PointPlacement)
             {
                 DrawCursor();
@@ -161,9 +159,8 @@ public class PointsApp
             #region Вершины
 
             gl.Begin(OpenGL.GL_POINTS);
-            gl.Color(new float[] {1f, 1f, 1f, 0.6f});
-            DrawGroup(pointsGroup);
-
+            gl.Color(new float[] { 1f, 1f, 1f, 0.6f });
+            DrawPoints(points);
             if (State == AppState.PointPlacement)
             {
                 DrawCursor();
@@ -175,76 +172,94 @@ public class PointsApp
 
             gl.LineWidth(1);
             gl.PointSize(1);
-            gl.Color(Color);
         }
+
+        void HighlightClosestPoint(PointF? hoveredPoint)
+        {
+            if (hoveredPoint is null) return;
+
+            gl.PointSize(9);
+
+            gl.Begin(OpenGL.GL_POINTS);
+            gl.Color(new[] { 0f, 1f, 0f, 0.6f });
+
+            gl.Vertex(hoveredPoint.Value.X, hoveredPoint.Value.Y);
+
+            gl.End();
+
+            gl.PointSize(1);
+        }
+
+        void DrawEditingGroup()
+        {
+            var group = PointContext.CurrentGroup!;
+
+            gl.Begin(OpenGL.GL_TRIANGLE_FAN);
+            gl.Color(group.Color);
+
+            var points = group.Points.Select((p, index) =>
+                index ==  PointContext.EditingPointIndex!
+                    ? PointContext.Cursor.Position
+                    : p
+            );
+            DrawPoints(points);
+            gl.End();
+
+            DrawOutline(points);
+
+            HighlightClosestPoint(PointContext.Cursor.Position);
+        }
+
 
         foreach (var group in PointContext.Groups.Where(x => x != PointContext.CurrentGroup))
         {
             gl.Begin(OpenGL.GL_TRIANGLE_FAN);
             gl.Color(group.Color);
 
-            // Для выделения близкой точки
-            // if (State == AppState.SelectingPointToEdit)
-            // {
-            //     var cursor = PointContext.Cursor.Position;
-            //     if (MathF.Abs(cursor.X - p.X) < 5e-2
-            //         && MathF.Abs(cursor.Y - p.Y) < 5e-2)
-            //     {
-            //         hoveredPoint = p;
-            //     }
-            // }
+            DrawPoints(group.Points);
 
-            DrawGroup(group);
-            
             gl.End();
         }
 
         var currentGroup = PointContext.CurrentGroup;
         if (currentGroup is not null)
         {
-            gl.Begin(OpenGL.GL_TRIANGLE_FAN);
-            gl.Color(currentGroup.Color);
-
-            DrawGroup(currentGroup);
-            if (State == AppState.PointPlacement && currentGroup == PointContext.CurrentGroup)
+            if (State == AppState.PointEditing)
             {
-                DrawCursor();
+                DrawEditingGroup();
             }
-            gl.End();
+            else
+            {
+                gl.Begin(OpenGL.GL_TRIANGLE_FAN);
+                gl.Color(currentGroup.Color);
 
-            DrawOutline(currentGroup);
-        }
+                DrawPoints(currentGroup.Points);
+                if (State == AppState.PointPlacement)
+                {
+                    DrawCursor();
+                }
+                gl.End();
 
+                DrawOutline(currentGroup.Points);
+            }
 
-        if (hoveredPoint is not null)
-        {
-            gl.PointSize(9);
-            gl.Color(new float[] { 0f, 1f, 0f, 0.6f });
-
-            gl.Begin(OpenGL.GL_POINTS);
-
-            gl.Vertex(hoveredPoint.Value.X, hoveredPoint.Value.Y);
-
-            gl.End();
-
-            gl.PointSize(9);
-            gl.Color(Color);
-
+            if (State == AppState.SelectingPointToEdit)
+            {
+                HighlightClosestPoint(PointContext.ClosestPoint);
+            }
         }
     }
 
     public void ForceRender()
     {
-        _dispatcher.Invoke(_glControl.DoRender);
+        _renderScheduled = true;
     }
 
     private void RenderTimerCallback(object state)
     {
-        if (!RenderScheduled) return;
+        if (!_renderScheduled) return;
 
         _dispatcher.Invoke(_glControl.DoRender);
-        RenderScheduled = false;
+        _renderScheduled = false;
     }
-
-    
 }

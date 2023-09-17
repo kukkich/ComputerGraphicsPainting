@@ -12,4 +12,5 @@ public interface IInputControlState
     void OnRightClick(OpenGLControl glControl, MouseButtonEventArgs e);
     void OnUndoButton();
     void OnRedoButton();
+    void OnEditModeToggle();
 }

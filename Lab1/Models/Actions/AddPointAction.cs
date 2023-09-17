@@ -2,7 +2,7 @@
 
 namespace Lab1.Models.Actions;
 
-public class AddPointAction : OneTimeAction
+public class AddPointAction : IAction
 {
     private readonly PointContext _pointContext;
     private readonly PointF _point;
@@ -13,15 +13,13 @@ public class AddPointAction : OneTimeAction
         _point = point;
     }
 
-    public override void Do()
+    public void Do()
     {
-        base.Do();
         _pointContext.AddPoint(_point);
     }
 
-    public override void Undo()
+    public void Undo()
     {
-        base.Undo();
         _pointContext.RemoveLastPoint();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Input;
+using Lab1.Models.Controls.States;
 using SharpGL.WPF;
 
 namespace Lab1.Models.Controls;
@@ -50,14 +51,19 @@ public class InputControl : IInputControlState
         _state.OnRedoButton();
     }
 
+    public void OnEditModeToggle()
+    {
+        _state.OnEditModeToggle();
+    }
+
     public void ForceChangeState(AppState state)
     {
         _state = state switch
         {
             AppState.Initial => new InitialState(_app),
             AppState.PointPlacement => new PointPlacementState(_app),
-            AppState.PointEditing => throw new NotImplementedException(),
-            AppState.SelectingPointToEdit => throw new NotImplementedException(),
+            AppState.PointEditing => new PointEditingState(_app),
+            AppState.SelectingPointToEdit => new SelectingPointToEditState(_app),
             _ => throw new ArgumentOutOfRangeException(nameof(state), state, null)
         };
     }

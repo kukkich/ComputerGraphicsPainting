@@ -79,11 +79,16 @@ namespace Lab1
             {
                 PointsApp.InputControl.OnRedoButton();
             }
+
+            if (e.Key == Key.E)
+            {
+                PointsApp.InputControl.OnEditModeToggle();
+            }
         }
 
         private void PointsGroups_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selectedItem = (PointsGroupView)e.AddedItems[0];
+            var selectedItem = (PointsGroupView)e.AddedItems[0]!;
             MessageBox.Show(selectedItem.Index.ToString());
         }
     }
