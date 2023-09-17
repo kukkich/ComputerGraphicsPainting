@@ -28,6 +28,6 @@ public class SelectingPointToEditState : BaseState
 
     public override void OnEditModeToggle()
     {
-        App.PushAction(new ChangeStateAction(App, AppState.PointEditing));
+        App.PushAction(new ChangeStateAction(App, AppState.PointPlacement));
     }
 }

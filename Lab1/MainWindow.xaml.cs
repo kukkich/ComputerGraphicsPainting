@@ -6,6 +6,7 @@ using System.Windows.Input;
 using Lab1.Models;
 using Lab1.Models.Controls;
 using Lab1.ViewModels;
+using Microsoft.VisualBasic;
 using SharpGL;
 using SharpGL.WPF;
 
@@ -80,10 +81,19 @@ namespace Lab1
                 PointsApp.InputControl.OnRedoButton();
             }
 
-            if (e.Key == Key.E)
+            try
             {
-                PointsApp.InputControl.OnEditModeToggle();
+                if (e.Key == Key.E)
+                {
+                    PointsApp.InputControl.OnEditModeToggle();
+                }
             }
+            catch (InvalidOperationException exception)
+            {
+                MessageBox.Show(exception.Message);
+            }
+
+            
         }
 
         private void PointsGroups_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
