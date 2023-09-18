@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Lab1.ViewModels;
+using Color = System.Windows.Media.Color;
 
 namespace Lab1.Models;
 
@@ -14,7 +15,12 @@ public class PointContext
     public int CurrentGroupIndex { get; private set; }
 
     public Cursor Cursor { get; set; }
-    public int? ClosestPointIndex { get; private set; }
+
+    public int? ClosestPointIndex
+    {
+        get;
+        private set;
+    }
     public PointF? ClosestPoint 
     {
         get
@@ -32,6 +38,8 @@ public class PointContext
 
     private readonly List<PointsGroup> _groups;
     private readonly PointsAppView _view;
+
+    private int _erasedSelectedIndex;
 
     public PointContext(PointsAppView view)
     {
@@ -54,7 +62,8 @@ public class PointContext
                 CurrentGroupIndex
             )
         );
-        _view.CurrentGroupIndex = CurrentGroupIndex;
+        
+        _view.CurrentGroupIndex = _view.PointsGroup.Count - 1;
     }
 
     public void AddPoint(PointF point)
@@ -65,19 +74,29 @@ public class PointContext
 
     public PointsGroup RemoveLastGroup()
     {
-        var removed = _groups[CurrentGroupIndex];
+        var actualIndex = CurrentGroupIndex == -1
+            ? _erasedSelectedIndex
+            : CurrentGroupIndex;
+        var removed = _groups[actualIndex];
 
-        _groups.RemoveAt(CurrentGroupIndex);
-        _view.PointsGroup.RemoveAt(CurrentGroupIndex);
+        _groups.RemoveAt(actualIndex);
+        _view.PointsGroup.RemoveAt(actualIndex);
 
-        CurrentGroupIndex--;
-        _view.CurrentGroupIndex--;
-
-        if (CurrentGroupIndex < 0)
+        if (CurrentGroupIndex == -1)
         {
-            CurrentGroupIndex = 0;
-            _groups.Add(new());
+            _erasedSelectedIndex--;
         }
+        else
+        {
+            CurrentGroupIndex--;
+            _view.CurrentGroupIndex--;
+        }
+
+        // if (CurrentGroupIndex < 0)
+        // {
+        //     CurrentGroupIndex = 0;
+        //     _groups.Add(new());
+        // }
 
         return removed;
     }
@@ -170,5 +189,23 @@ public class PointContext
 
         CurrentGroupIndex = index;
         _view.CurrentGroupIndex = index;
+    }
+
+    public void Unselect()
+    {
+        _erasedSelectedIndex = CurrentGroupIndex;
+        CurrentGroupIndex = -1;
+        _view.CurrentGroupIndex = -1;
+    }
+    public void ReturnSelection()
+    {
+        CurrentGroupIndex = _erasedSelectedIndex;
+        _view.CurrentGroupIndex = _erasedSelectedIndex;
+    }
+    public void SelectNewColor(Color newColor)
+    {
+        if (CurrentGroup is null) return;
+        CurrentGroup.Color = newColor;
+        _view.SelectedInTableGroup.Color = newColor;
     }
 }

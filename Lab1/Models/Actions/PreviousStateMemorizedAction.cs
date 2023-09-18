@@ -5,7 +5,7 @@ namespace Lab1.Models.Actions;
 public abstract class PreviousStateMemorizedAction : IAction
 {
     protected PointsApp App { get; }
-    private AppState? _oldState;
+    private AppState _oldState;
 
     protected PreviousStateMemorizedAction(PointsApp app)
     {
@@ -19,12 +19,6 @@ public abstract class PreviousStateMemorizedAction : IAction
 
     public virtual void Undo()
     {
-        if (_oldState is null)
-        {
-            throw new InvalidOperationException();
-        }
-
-        App.State = _oldState.Value;
-        _oldState = null;
+        App.State = _oldState;
     }
 }

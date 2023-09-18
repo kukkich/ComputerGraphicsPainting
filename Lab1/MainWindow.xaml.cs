@@ -3,12 +3,16 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Lab1.Models;
+using Lab1.Models.Actions;
 using Lab1.Models.Controls;
 using Lab1.ViewModels;
 using Microsoft.VisualBasic;
 using SharpGL;
 using SharpGL.WPF;
+using Xceed.Wpf.Toolkit;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Lab1
 {
@@ -23,10 +27,10 @@ namespace Lab1
         {
             InitializeComponent();
 
-            AppView = new PointsAppView(GroupsTable);
+            AppView = new PointsAppView(GroupsTable, ColorPicker);
             PointsApp = new PointsApp(Dispatcher, AppView);
 
-            
+
             DataContext = this;
         }
 
@@ -42,7 +46,7 @@ namespace Lab1
 
         private void OpenGLControl_MouseMove(object sender, MouseEventArgs e)
         {
-            InputControl.OnMouseHover((OpenGLControl) sender, e);
+            InputControl.OnMouseHover((OpenGLControl)sender, e);
         }
 
         private void UIElement_OnMouseLeave(object sender, MouseEventArgs e)
@@ -93,16 +97,60 @@ namespace Lab1
                 MessageBox.Show(exception.Message);
             }
 
-            
+
         }
 
         private void PointsGroups_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count == 0) return;
+            if (e.AddedItems[0] is PointsGroupView selectedItem)
+            {
+                var s = sender as ListView;
+                // if (AppView.PointsGroup.Count > 0)
+                // {
+                //     var color = AppView.SelectedInTableGroup.Color;
+                //     ColorPicker.SelectedColor = color;
+                // }
+                if (!s.IsMouseOver) return;
 
-            var selectedItem = (PointsGroupView)e.AddedItems[0]!;
-            PointsApp.InputControl.OnCurrentGroupChanged(selectedItem.Index);
-            // MessageBox.Show(selectedItem.Index.ToString());
+                PointsApp.InputControl.OnCurrentGroupChanged(selectedItem.Index);
+            }
+        }
+
+        private void ClrPicker_Background_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            var s = (ColorPicker)sender;
+            
+            var newColor = s.SelectedColor;
+            if (newColor is null) { return; }
+
+            if (e.OldValue is not null)
+            {
+                //PointsApp.PointContext.SelectNewColor(newColor.Value);
+                //PointsApp.ForceRender();
+            }
+        }
+
+        private void ColorPicker_OnOpened(object sender, RoutedEventArgs e)
+        {
+            if (AppView.CurrentGroupIndex >= 0) return;
+            
+            e.Handled = true;
+            ColorPicker.IsOpen = false;
+        }
+
+        private void ColorPicker_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+        }
+
+        private void ColorPicker_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (ColorPicker.SelectedColor != AppView.SelectedInTableGroup.Color && ColorPicker.SelectedColor is not null)
+            {
+                //PointsApp.PointContext.SelectNewColor(ColorPicker.SelectedColor.Value);
+                PointsApp.PushAction(new ChangeColorAction(PointsApp, ColorPicker.SelectedColor.Value));
+                PointsApp.ForceRender();
+            }
         }
     }
 }

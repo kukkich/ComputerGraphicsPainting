@@ -1,14 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Windows.Threading;
+using Lab1.Extensions;
 using Lab1.Models.Actions;
 using Lab1.Models.Controls;
 using Lab1.ViewModels;
 using SharpGL;
 using SharpGL.WPF;
+using Color = System.Windows.Media.Color;
+
 // ReSharper disable PossibleMultipleEnumeration
 
 namespace Lab1.Models;
@@ -23,11 +25,18 @@ public class PointsApp
         get => _state;
         set
         {
+            if (value == AppState.Initial)
+            {
+                PointContext.Unselect();
+            }
+            else if (_state is AppState.Initial)
+            {
+                PointContext.ReturnSelection();
+            }
             _state = value;
             _view.State = value.ToString();
         }
     }
-
     private AppState _state;
 
     private readonly List<IAction> _actions;
@@ -54,6 +63,8 @@ public class PointsApp
         InputControl = new InputControl(this);
 
         _renderTimer = new Timer(RenderTimerCallback!, null, 0, 20);
+
+        State = AppState.Initial;
     }
 
     public void PushAction(IAction action)
@@ -209,7 +220,6 @@ public class PointsApp
             HighlightClosestPoint(PointContext.Cursor.Position);
         }
 
-
         foreach (var group in PointContext.Groups.Where(x => x != PointContext.CurrentGroup))
         {
             gl.Begin(OpenGL.GL_TRIANGLE_FAN);
@@ -252,6 +262,12 @@ public class PointsApp
     public void ForceRender()
     {
         _renderScheduled = true;
+    }
+
+    public void SelectNewColor(Color newColor)
+    {
+        _view.ColorPicker.SelectedColor = newColor;
+        PointContext.SelectNewColor(newColor);
     }
 
     private void RenderTimerCallback(object state)

@@ -3,11 +3,13 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using Lab1.Models;
+using Xceed.Wpf.Toolkit;
 
 namespace Lab1.ViewModels;
 
 public class PointsAppView : INotifyPropertyChanged
 {
+    public ColorPicker ColorPicker { get; }
 
     public ObservableCollection<PointsGroupView> PointsGroup
     {
@@ -29,12 +31,18 @@ public class PointsAppView : INotifyPropertyChanged
             if (value < 0)
             {
                 _groupsTable.UnselectAll();
+                ColorPicker.SelectedColor = null;
+                ColorPicker.ShowDropDownButton = false;
             }
             else
             {
+                SelectedInTableGroup = _pointsGroup[value];
                 _groupsTable.SelectedIndex = value;
-            }
 
+                var color = SelectedInTableGroup.Color;
+                ColorPicker.SelectedColor = color;
+                ColorPicker.ShowDropDownButton = true;
+            }
             OnPropertyChanged();
         }
     }
@@ -57,10 +65,7 @@ public class PointsAppView : INotifyPropertyChanged
         set
         {
             _state = value;
-            if (value == nameof(AppState.Initial))
-            {
-                CurrentGroupIndex = -1;
-            }
+            
             OnPropertyChanged();
         }
     }
@@ -68,8 +73,9 @@ public class PointsAppView : INotifyPropertyChanged
 
     private readonly ListView _groupsTable;
 
-    public PointsAppView(ListView groupsTable)
+    public PointsAppView(ListView groupsTable, ColorPicker colorPicker)
     {
+        ColorPicker = colorPicker;
         _groupsTable = groupsTable;
 
         _pointsGroup = new ObservableCollection<PointsGroupView>();

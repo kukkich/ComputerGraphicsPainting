@@ -6,11 +6,15 @@
         xmlns:local="clr-namespace:Lab1"
         xmlns:wpf="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:viewModels="clr-namespace:Lab1.ViewModels"
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="1300"
         KeyDown="MainWindow_OnKeyDown">
-
+    <Window.Resources>
+        <viewModels:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+    </Window.Resources>
     <Grid>
+        
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="10*"/>
@@ -18,17 +22,35 @@
 
         <!-- Боковая панель -->
         <StackPanel Grid.Column="0" Background="LightGray">
-            <Button Content="Кнопка 3" Margin="10"/>
+            <Button Content="Удалить" Margin="10" Height="50"/>
+            <Button Content="Назад" Margin="10" Height="50"/>
+            <Button Content="Вперед" Margin="10" Height="50"/>
+
             <TextBlock Text="{Binding Path= AppView.State}" Margin="10"/>
-            <xctk:ColorPicker/>
+            <xctk:ColorPicker Name="ColorPicker" SelectedColorChanged="ClrPicker_Background_OnSelectedColorChanged" 
+                              MouseLeftButtonDown="ColorPicker_OnMouseLeftButtonDown"
+                              PreviewMouseLeftButtonUp="ColorPicker_OnMouseLeftButtonUp"
+                              Opened="ColorPicker_OnOpened"
+            />
             <ListView SelectionChanged="PointsGroups_OnSelectionChanged" Name="GroupsTable" ItemsSource="{Binding AppView.PointsGroup}" >
                 <ListView.View>
                     <GridView>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Index}">Номер</GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=PointsCount}">Точек</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Color[0]}">Red</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Color[1]}">Green</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Color[2]}">Blue</GridViewColumn>
+
+                        <GridViewColumn Header="Цвет">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <!--<Canvas Width="20" Height="20" Background="Chartreuse" />-->
+                                    <Canvas Width="20" Height="20" 
+                                            Background="{Binding Path=Color, Converter={StaticResource ColorToBrushConverter}}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <!--<GridViewColumn DisplayMemberBinding="{Binding Path=Color.R}">Red</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Color.G}">Green</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Color.B}">Blue</GridViewColumn>-->
                     </GridView>
                 </ListView.View>
             </ListView>

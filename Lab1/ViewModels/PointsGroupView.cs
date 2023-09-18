@@ -1,6 +1,10 @@
 ﻿using Lab1.Models;
+using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Windows.Data;
+using System.Windows.Media;
 
 namespace Lab1.ViewModels;
 
@@ -17,7 +21,7 @@ public class PointsGroupView : INotifyPropertyChanged
     }
     private int _index;
 
-    public float[] Color
+    public Color Color
     {
         get => _color;
         set
@@ -26,7 +30,7 @@ public class PointsGroupView : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-    private float[] _color;
+    private Color _color;
 
     public int PointsCount
     {
@@ -51,5 +55,23 @@ public class PointsGroupView : INotifyPropertyChanged
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = "")
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+
+public class ColorToBrushConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is Color color)
+        {
+            return new SolidColorBrush(Color.FromRgb(color.R, color.G, color.B));
+        }
+
+        return null; // Если значение не является Color, возвращаем null или другое значение по умолчанию
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException(); // Этот метод не используется в данном примере
     }
 }
