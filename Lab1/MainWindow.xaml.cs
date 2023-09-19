@@ -101,18 +101,26 @@ namespace Lab1
             {
                 PointsApp.InputControl.OnRedoButton();
             }
-
-            try
+            if (e.Key == Key.D)
             {
-                if (e.Key == Key.E)
+                if (PointsApp.State is AppState.PointPlacement)
+                {
+                    PointsApp.PushAction(new RemoveGroupAction(PointsApp, PointsApp.PointContext.CurrentGroupIndex));
+                }
+            }
+
+            if (e.Key == Key.E)
+            {
+                try
                 {
                     PointsApp.InputControl.OnEditModeToggle();
                 }
+                catch (InvalidOperationException exception)
+                {
+                    MessageBox.Show(exception.Message);
+                }
             }
-            catch (InvalidOperationException exception)
-            {
-                MessageBox.Show(exception.Message);
-            }
+
         }
 
         private void PointsGroups_OnSelectionChanged(object sender, SelectionChangedEventArgs e)

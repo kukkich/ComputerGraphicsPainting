@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using Color = System.Windows.Media.Color;
 
 namespace Lab1.Models;
@@ -105,7 +106,10 @@ public class PointContext
 
         _groups.RemoveAt(index);
         _view.PointsGroup.RemoveAt(index);
-
+        foreach (var group in _view.PointsGroup.Skip(index))
+        {
+            group.Index--;
+        }
         return removed;
     }
 
@@ -121,6 +125,11 @@ public class PointContext
             group,
             index
         ));
+
+        foreach (var groupView in _view.PointsGroup.Skip(index + 1))
+        {
+            groupView.Index++;
+        }
     }
 
     public void RemoveLastPoint()
@@ -221,9 +230,17 @@ public class PointContext
     }
     public void ReturnSelection()
     {
-        CurrentGroupIndex = _erasedSelectedIndex;
-        _view.CurrentGroupIndex = _erasedSelectedIndex;
-        _erasedSelectedIndex = -1;
+        try
+        {
+            CurrentGroupIndex = _erasedSelectedIndex;
+            _view.CurrentGroupIndex = _erasedSelectedIndex;
+            _erasedSelectedIndex = -1;
+        }
+        catch (IndexOutOfRangeException)
+        {
+            CurrentGroupIndex = _groups.Count - 1;
+            _view.CurrentGroupIndex = CurrentGroupIndex;
+        }
     }
     public void SelectNewColor(Color newColor)
     {
