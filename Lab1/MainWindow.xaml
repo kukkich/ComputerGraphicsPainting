@@ -22,7 +22,7 @@
 
         <!-- Боковая панель -->
         <StackPanel Grid.Column="0" Background="LightGray">
-            <ListView Height="100" SelectionChanged="PointsGroups_OnSelectionChanged" Name="GroupsTable" ItemsSource="{Binding AppView.PointsGroup}" >
+            <ListView Height="150" SelectionChanged="PointsGroups_OnSelectionChanged" Name="GroupsTable" ItemsSource="{Binding AppView.PointsGroup}" >
                 <ListView.View>
                     <GridView>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Index}">Номер</GridViewColumn>
@@ -56,10 +56,12 @@
                     Name="RemoveButton"
                     Click="RemoveButton_OnClick"/>
 
-            <Button Content="Переключить режим редактирования"
-                    Margin="10" Height="40"
+            <Button Margin="10" Height="40"
                     Name="ChangeEditModeButton"
-                    Click="ChangeEditModeButton_OnClick"/>
+                    Click="ChangeEditModeButton_OnClick"
+                    >
+                <TextBlock Text="Переключить режим редактирования" TextWrapping="Wrap" TextAlignment="Center"/>
+            </Button>
 
             <Button Content="Завершить редактирование"
                     Margin="10" Height="40"
