@@ -1,6 +1,6 @@
-﻿using SharpGL.WPF;
+﻿using Lab1.Models.Actions;
+using SharpGL.WPF;
 using System.Windows.Input;
-using Lab1.Models.Actions;
 
 namespace Lab1.Models.Controls.States;
 

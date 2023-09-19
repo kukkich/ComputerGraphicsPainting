@@ -1,15 +1,15 @@
-﻿using System.Windows.Input;
-using Lab1.Models.Actions;
+﻿using Lab1.Models.Actions;
 using SharpGL.WPF;
+using System.Windows.Input;
 
 namespace Lab1.Models.Controls.States;
 
 public class PointPlacementState : BaseState
 {
 
-    public PointPlacementState(PointsApp app) 
+    public PointPlacementState(PointsApp app)
         : base(app)
-        { }
+    { }
 
     public override void OnMouseHover(OpenGLControl glControl, MouseEventArgs e)
     {

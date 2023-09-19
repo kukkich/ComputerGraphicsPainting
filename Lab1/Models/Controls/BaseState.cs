@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Lab1.Models.Actions;
+using SharpGL.WPF;
+using System;
 using System.Drawing;
 using System.Windows.Input;
-using Lab1.Models.Actions;
-using SharpGL.WPF;
 
 namespace Lab1.Models.Controls;
 
@@ -20,8 +20,8 @@ public abstract class BaseState : IInputControlState
     {
         var position = e.GetPosition(glControl);
         return new PointF(
-            (float) (position.X / glControl.ActualWidth) * 2 - 1,
-            -((float) (position.Y / glControl.ActualHeight) * 2 - 1)
+            (float)(position.X / glControl.ActualWidth) * 2 - 1,
+            -((float)(position.Y / glControl.ActualHeight) * 2 - 1)
         );
     }
 

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Windows.Input;
-using Lab1.Models.Controls.States;
+﻿using Lab1.Models.Controls.States;
 using SharpGL.WPF;
+using System;
+using System.Windows.Input;
 
 namespace Lab1.Models.Controls;
 

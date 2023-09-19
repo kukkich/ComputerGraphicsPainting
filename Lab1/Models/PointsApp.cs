@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Threading;
-using System.Windows.Threading;
-using Lab1.Extensions;
+﻿using Lab1.Extensions;
 using Lab1.Models.Actions;
 using Lab1.Models.Controls;
 using Lab1.ViewModels;
 using SharpGL;
 using SharpGL.WPF;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Threading;
+using System.Windows.Threading;
 using Color = System.Windows.Media.Color;
 
 // ReSharper disable PossibleMultipleEnumeration
@@ -45,7 +45,7 @@ public class PointsApp
     private OpenGLControl _glControl = null!;
     private OpenGL _glContext = null!;
     private readonly Dispatcher _dispatcher;
-    
+
     private bool _renderScheduled = false;
     private readonly Timer _renderTimer;
 
@@ -208,7 +208,7 @@ public class PointsApp
             gl.Color(group.Color);
 
             var points = group.Points.Select((p, index) =>
-                index ==  PointContext.EditingPointIndex!
+                index == PointContext.EditingPointIndex!
                     ? PointContext.Cursor.Position
                     : p
             );

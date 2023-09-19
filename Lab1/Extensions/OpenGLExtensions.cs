@@ -1,5 +1,5 @@
-﻿using System.Windows.Media;
-using SharpGL;
+﻿using SharpGL;
+using System.Windows.Media;
 
 namespace Lab1.Extensions;
 

@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Lab1.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Lab1.ViewModels;
 using Color = System.Windows.Media.Color;
 
 namespace Lab1.Models;
@@ -9,8 +9,8 @@ namespace Lab1.Models;
 public class PointContext
 {
     public List<PointsGroup> Groups => _groups;
-    public PointsGroup? CurrentGroup => CurrentGroupIndex < 0 
-        ? null 
+    public PointsGroup? CurrentGroup => CurrentGroupIndex < 0
+        ? null
         : _groups[CurrentGroupIndex];
     public int CurrentGroupIndex { get; private set; }
 
@@ -21,7 +21,7 @@ public class PointContext
         get;
         private set;
     }
-    public PointF? ClosestPoint 
+    public PointF? ClosestPoint
     {
         get
         {
@@ -62,7 +62,7 @@ public class PointContext
                 CurrentGroupIndex
             )
         );
-        
+
         _view.CurrentGroupIndex = _view.PointsGroup.Count - 1;
     }
 
@@ -91,14 +91,36 @@ public class PointContext
             CurrentGroupIndex--;
             _view.CurrentGroupIndex--;
         }
+        return removed;
+    }
 
-        // if (CurrentGroupIndex < 0)
-        // {
-        //     CurrentGroupIndex = 0;
-        //     _groups.Add(new());
-        // }
+    public PointsGroup RemoveGroupAt(int index)
+    {
+        if (index < 0 || index >= _groups.Count)
+        {
+            throw new ArgumentOutOfRangeException();
+        }
+
+        var removed = _groups[index];
+
+        _groups.RemoveAt(index);
+        _view.PointsGroup.RemoveAt(index);
 
         return removed;
+    }
+
+    public void InsertGroupAt(int index, PointsGroup group)
+    {
+        if (index < 0 || index >= _groups.Count)
+        {
+            throw new ArgumentOutOfRangeException();
+        }
+
+        _groups.Insert(index, group);
+        _view.PointsGroup.Insert(index, new PointsGroupView(
+            group,
+            index
+        ));
     }
 
     public void RemoveLastPoint()
@@ -201,6 +223,7 @@ public class PointContext
     {
         CurrentGroupIndex = _erasedSelectedIndex;
         _view.CurrentGroupIndex = _erasedSelectedIndex;
+        _erasedSelectedIndex = -1;
     }
     public void SelectNewColor(Color newColor)
     {

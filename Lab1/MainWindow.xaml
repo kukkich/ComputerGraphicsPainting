@@ -22,17 +22,7 @@
 
         <!-- Боковая панель -->
         <StackPanel Grid.Column="0" Background="LightGray">
-            <Button Content="Удалить" Margin="10" Height="50"/>
-            <Button Content="Назад" Margin="10" Height="50"/>
-            <Button Content="Вперед" Margin="10" Height="50"/>
-
-            <TextBlock Text="{Binding Path= AppView.State}" Margin="10"/>
-            <xctk:ColorPicker Name="ColorPicker" SelectedColorChanged="ClrPicker_Background_OnSelectedColorChanged" 
-                              MouseLeftButtonDown="ColorPicker_OnMouseLeftButtonDown"
-                              PreviewMouseLeftButtonUp="ColorPicker_OnMouseLeftButtonUp"
-                              Opened="ColorPicker_OnOpened"
-            />
-            <ListView SelectionChanged="PointsGroups_OnSelectionChanged" Name="GroupsTable" ItemsSource="{Binding AppView.PointsGroup}" >
+            <ListView Height="100" SelectionChanged="PointsGroups_OnSelectionChanged" Name="GroupsTable" ItemsSource="{Binding AppView.PointsGroup}" >
                 <ListView.View>
                     <GridView>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=Index}">Номер</GridViewColumn>
@@ -41,19 +31,41 @@
                         <GridViewColumn Header="Цвет">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <!--<Canvas Width="20" Height="20" Background="Chartreuse" />-->
-                                    <Canvas Width="20" Height="20" 
+                                    <Canvas MinWidth="90" Height="20" 
                                             Background="{Binding Path=Color, Converter={StaticResource ColorToBrushConverter}}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-
-                        <!--<GridViewColumn DisplayMemberBinding="{Binding Path=Color.R}">Red</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Color.G}">Green</GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Color.B}">Blue</GridViewColumn>-->
                     </GridView>
                 </ListView.View>
             </ListView>
+            
+            <TextBlock Text="{Binding Path= AppView.State}" Margin="10"/>
+            <xctk:ColorPicker Name="ColorPicker" SelectedColorChanged="ClrPicker_Background_OnSelectedColorChanged" 
+                              MouseLeftButtonDown="ColorPicker_OnMouseLeftButtonDown"
+                              PreviewMouseLeftButtonUp="ColorPicker_OnMouseLeftButtonUp"
+                              Opened="ColorPicker_OnOpened"
+            />
+
+            <Button Content="Назад" Margin="10" Height="40"
+                    Click="UndoButton_OnClick"/>
+            <Button Content="Вперед" Margin="10" Height="40"
+                    Click="RedoButton_OnClick"/>
+
+            <Button Content="Удалить" Margin="10" Height="40"
+                    Name="RemoveButton"
+                    Click="RemoveButton_OnClick"/>
+
+            <Button Content="Переключить режим редактирования"
+                    Margin="10" Height="40"
+                    Name="ChangeEditModeButton"
+                    Click="ChangeEditModeButton_OnClick"/>
+
+            <Button Content="Завершить редактирование"
+                    Margin="10" Height="40"
+                    Name="StopEditButton"
+                    Click="StopEditButton_OnClick"/>
+            
         </StackPanel>
 
         <!-- OpenGLControl -->

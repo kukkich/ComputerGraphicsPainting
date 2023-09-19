@@ -7,7 +7,7 @@ public class ChangeStateAction : IAction
     private readonly PointsApp _app;
     private readonly AppState _newState;
     private AppState? _oldState;
-    
+
     public ChangeStateAction(PointsApp app, AppState newState)
     {
         _app = app;

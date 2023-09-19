@@ -2,18 +2,17 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
-using Lab1.Models;
 using Xceed.Wpf.Toolkit;
 
 namespace Lab1.ViewModels;
 
 public class PointsAppView : INotifyPropertyChanged
 {
-    public ColorPicker ColorPicker { get; }
+    public ColorPicker ColorPicker => _window.ColorPicker;
 
     public ObservableCollection<PointsGroupView> PointsGroup
     {
-        get => _pointsGroup; 
+        get => _pointsGroup;
         set
         {
             _pointsGroup = value;
@@ -31,17 +30,14 @@ public class PointsAppView : INotifyPropertyChanged
             if (value < 0)
             {
                 _groupsTable.UnselectAll();
-                ColorPicker.SelectedColor = null;
-                ColorPicker.ShowDropDownButton = false;
+                _window.HideGroupActions();
             }
             else
             {
                 SelectedInTableGroup = _pointsGroup[value];
                 _groupsTable.SelectedIndex = value;
 
-                var color = SelectedInTableGroup.Color;
-                ColorPicker.SelectedColor = color;
-                ColorPicker.ShowDropDownButton = true;
+                _window.ShowGroupActions();
             }
             OnPropertyChanged();
         }
@@ -65,21 +61,22 @@ public class PointsAppView : INotifyPropertyChanged
         set
         {
             _state = value;
-            
+
             OnPropertyChanged();
         }
     }
     private string _state = "";
 
     private readonly ListView _groupsTable;
+    private readonly MainWindow _window;
 
-    public PointsAppView(ListView groupsTable, ColorPicker colorPicker)
+    public PointsAppView(ListView groupsTable, MainWindow window)
     {
-        ColorPicker = colorPicker;
         _groupsTable = groupsTable;
+        _window = window;
 
         _pointsGroup = new ObservableCollection<PointsGroupView>();
-        _pointsGroup.CollectionChanged += ( _, _) 
+        _pointsGroup.CollectionChanged += (_, _)
             => OnPropertyChanged(nameof(PointsGroup));
     }
 

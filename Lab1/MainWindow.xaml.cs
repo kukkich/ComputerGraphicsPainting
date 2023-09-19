@@ -1,17 +1,13 @@
-﻿using System;
-using System.Threading;
+﻿using Lab1.Models;
+using Lab1.Models.Actions;
+using Lab1.Models.Controls;
+using Lab1.ViewModels;
+using SharpGL.WPF;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Lab1.Models;
-using Lab1.Models.Actions;
-using Lab1.Models.Controls;
-using Lab1.ViewModels;
-using Microsoft.VisualBasic;
-using SharpGL;
-using SharpGL.WPF;
-using Xceed.Wpf.Toolkit;
 using MessageBox = System.Windows.MessageBox;
 
 namespace Lab1
@@ -20,18 +16,39 @@ namespace Lab1
     {
         public PointsApp PointsApp { get; }
         public PointsAppView AppView { get; }
-        public PointContext PointContext => PointsApp.PointContext;
         public InputControl InputControl => PointsApp.InputControl;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            AppView = new PointsAppView(GroupsTable, ColorPicker);
+            AppView = new PointsAppView(GroupsTable, this);
             PointsApp = new PointsApp(Dispatcher, AppView);
 
 
             DataContext = this;
+        }
+
+
+        public void ShowGroupActions()
+        {
+            var color = AppView.SelectedInTableGroup.Color;
+            ColorPicker.SelectedColor = color;
+            ColorPicker.ShowDropDownButton = true;
+
+            RemoveButton.IsEnabled = true;
+            ChangeEditModeButton.IsEnabled = true;
+            StopEditButton.IsEnabled = true;
+        }
+
+        public void HideGroupActions()
+        {
+            RemoveButton.IsEnabled = false;
+            ChangeEditModeButton.IsEnabled = false;
+            StopEditButton.IsEnabled = false;
+
+            ColorPicker.SelectedColor = null;
+            ColorPicker.ShowDropDownButton = false;
         }
 
         private void OpenGLControl_OpenGLInitialized(object s, OpenGLRoutedEventArgs args)
@@ -96,8 +113,6 @@ namespace Lab1
             {
                 MessageBox.Show(exception.Message);
             }
-
-
         }
 
         private void PointsGroups_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -106,11 +121,7 @@ namespace Lab1
             if (e.AddedItems[0] is PointsGroupView selectedItem)
             {
                 var s = sender as ListView;
-                // if (AppView.PointsGroup.Count > 0)
-                // {
-                //     var color = AppView.SelectedInTableGroup.Color;
-                //     ColorPicker.SelectedColor = color;
-                // }
+
                 if (!s.IsMouseOver) return;
 
                 PointsApp.InputControl.OnCurrentGroupChanged(selectedItem.Index);
@@ -119,22 +130,12 @@ namespace Lab1
 
         private void ClrPicker_Background_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
-            var s = (ColorPicker)sender;
-            
-            var newColor = s.SelectedColor;
-            if (newColor is null) { return; }
-
-            if (e.OldValue is not null)
-            {
-                //PointsApp.PointContext.SelectNewColor(newColor.Value);
-                //PointsApp.ForceRender();
-            }
         }
 
         private void ColorPicker_OnOpened(object sender, RoutedEventArgs e)
         {
             if (AppView.CurrentGroupIndex >= 0) return;
-            
+
             e.Handled = true;
             ColorPicker.IsOpen = false;
         }
@@ -147,10 +148,44 @@ namespace Lab1
         {
             if (ColorPicker.SelectedColor != AppView.SelectedInTableGroup.Color && ColorPicker.SelectedColor is not null)
             {
-                //PointsApp.PointContext.SelectNewColor(ColorPicker.SelectedColor.Value);
                 PointsApp.PushAction(new ChangeColorAction(PointsApp, ColorPicker.SelectedColor.Value));
                 PointsApp.ForceRender();
             }
+        }
+
+        private void RemoveButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (PointsApp.State is AppState.PointPlacement)
+            {
+                PointsApp.PushAction(new RemoveGroupAction(PointsApp, PointsApp.PointContext.CurrentGroupIndex));
+            }
+        }
+
+        private void UndoButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            PointsApp.InputControl.OnUndoButton();
+        }
+
+        private void RedoButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            PointsApp.InputControl.OnRedoButton();
+        }
+
+        private void ChangeEditModeButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                PointsApp.InputControl.OnEditModeToggle();
+            }
+            catch (InvalidOperationException exception)
+            {
+                MessageBox.Show(exception.Message);
+            }
+        }
+
+        private void StopEditButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            PointsApp.PushAction(new ChangeStateAction(PointsApp, AppState.Initial));
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Lab1.Models.Actions;
+﻿namespace Lab1.Models.Actions;
 
 public abstract class PreviousStateMemorizedAction : IAction
 {

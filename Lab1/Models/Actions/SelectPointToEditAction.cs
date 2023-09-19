@@ -5,7 +5,7 @@ public class SelectPointToEditAction : PreviousStateMemorizedAction
     private readonly int _pointIndex;
     private PointContext PointsContext => App.PointContext;
 
-    public SelectPointToEditAction(PointsApp app, int pointIndex) 
+    public SelectPointToEditAction(PointsApp app, int pointIndex)
         : base(app)
     {
         _pointIndex = pointIndex;

@@ -8,7 +8,7 @@ public class CommitPointEditingAction : PreviousStateMemorizedAction
     private int _editedPointIndex;
     private PointF _oldPosition;
 
-    public CommitPointEditingAction(PointsApp app, PointF newPosition) 
+    public CommitPointEditingAction(PointsApp app, PointF newPosition)
         : base(app)
     {
         _newPosition = newPosition;
@@ -21,7 +21,7 @@ public class CommitPointEditingAction : PreviousStateMemorizedAction
         App.State = AppState.SelectingPointToEdit;
 
         _editedPointIndex = App.PointContext.EditingPointIndex!.Value;
-        
+
         _oldPosition = App.PointContext.CurrentGroup!.Points[_editedPointIndex];
 
         App.PointContext.CommitEditing(_newPosition);

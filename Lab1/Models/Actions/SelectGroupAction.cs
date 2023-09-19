@@ -5,7 +5,7 @@ public class SelectGroupAction : PreviousStateMemorizedAction
     private readonly int _newGroupIndex;
     private int _oldGroup;
 
-    public SelectGroupAction(PointsApp app, int newGroupIndex) 
+    public SelectGroupAction(PointsApp app, int newGroupIndex)
         : base(app)
     {
         _newGroupIndex = newGroupIndex;
