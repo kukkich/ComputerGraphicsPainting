@@ -33,6 +33,10 @@ public class PointsApp
             {
                 PointContext.ReturnSelection();
             }
+
+            _view.IsEditingEnable = value is AppState.PointEditing or AppState.SelectingPointToEdit;
+            _view.IsPointPlacementEnable = value is AppState.PointPlacement;
+
             _state = value;
             _view.State = value.ToString();
         }
@@ -78,6 +82,7 @@ public class PointsApp
         action.Do();
 
         InputControl.ForceChangeState(State);
+        _view.CanUndo = true;
 
         _renderScheduled = true;
     }
@@ -92,6 +97,8 @@ public class PointsApp
         _undoActions.Add(action);
 
         InputControl.ForceChangeState(State);
+        _view.CanUndo = _actions.Count > 0;
+        _view.CanRedo = true;
 
         _renderScheduled = true;
     }
@@ -106,6 +113,8 @@ public class PointsApp
         _actions.Add(action);
 
         InputControl.ForceChangeState(State);
+        _view.CanRedo = _undoActions.Count > 0;
+        _view.CanUndo = true;
 
         _renderScheduled = true;
     }
@@ -143,10 +152,6 @@ public class PointsApp
 
         void DrawOutline(IEnumerable<PointF> points)
         {
-            // TODO Удалить когда PointContext.CurrentGroup
-            // станет возвращать выделенную группу
-            // и null если не выделена
-
             if (State == AppState.Initial) return;
 
             gl.LineWidth(3);

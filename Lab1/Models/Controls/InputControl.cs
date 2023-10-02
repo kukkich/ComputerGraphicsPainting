@@ -1,6 +1,7 @@
 ﻿using Lab1.Models.Controls.States;
 using SharpGL.WPF;
 using System;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Lab1.Models.Controls;
@@ -58,7 +59,14 @@ public class InputControl : IInputControlState
 
     public void OnCurrentGroupChanged(int newGroupIndex)
     {
-        _state.OnCurrentGroupChanged(newGroupIndex);
+        try
+        {
+            _state.OnCurrentGroupChanged(newGroupIndex);
+        }
+        catch (InvalidOperationException e)
+        {
+            MessageBox.Show(e.Message);
+        }
     }
 
     public void ForceChangeState(AppState state)

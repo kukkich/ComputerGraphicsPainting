@@ -14,7 +14,7 @@
         <viewModels:ColorToBrushConverter x:Key="ColorToBrushConverter" />
     </Window.Resources>
     <Grid>
-        
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="10*"/>
@@ -25,7 +25,7 @@
             <ListView Height="150" SelectionChanged="PointsGroups_OnSelectionChanged" Name="GroupsTable" ItemsSource="{Binding AppView.PointsGroup}" >
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=Index}">Номер</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Number}">Номер</GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=PointsCount}">Точек</GridViewColumn>
 
                         <GridViewColumn Header="Цвет">
@@ -39,20 +39,23 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-            
-            <TextBlock Text="{Binding Path= AppView.State}" Margin="10"/>
+
+            <!-- <TextBlock Text="{Binding Path= AppView.State}" Margin="10"/> -->
+            <TextBlock Text="Выбрать цвет" Margin="10"/>
             <xctk:ColorPicker Name="ColorPicker" SelectedColorChanged="ClrPicker_Background_OnSelectedColorChanged" 
                               MouseLeftButtonDown="ColorPicker_OnMouseLeftButtonDown"
                               PreviewMouseLeftButtonUp="ColorPicker_OnMouseLeftButtonUp"
                               Opened="ColorPicker_OnOpened"
             />
 
-            <Button Content="Назад" Margin="10" Height="40"
+            <Button Content="ОТМЕНА ПРЕДЫДУЩЕГО ДЕЙСТВИЯ" Margin="10" Height="40"
+                    IsEnabled="{Binding Path=AppView.CanUndo}"
                     Click="UndoButton_OnClick"/>
-            <Button Content="Вперед" Margin="10" Height="40"
+            <Button Content="ОТМЕНА ОТМЕНЫ ПРЕДЫДУЩЕГО ДЕЙСТВИЯ" Margin="10" Height="40"
+                    IsEnabled="{Binding Path=AppView.CanRedo}"
                     Click="RedoButton_OnClick"/>
 
-            <Button Content="Удалить" Margin="10" Height="40"
+            <Button Content="Удалить ТЕКУЩУЮ ВЫДЕЛЕННУЮ группу" Margin="10" Height="40"
                     Name="RemoveButton"
                     Click="RemoveButton_OnClick"/>
 
@@ -63,11 +66,29 @@
                 <TextBlock Text="Переключить режим редактирования" TextWrapping="Wrap" TextAlignment="Center"/>
             </Button>
 
-            <Button Content="Завершить редактирование"
-                    Margin="10" Height="40"
-                    Name="StopEditButton"
-                    Click="StopEditButton_OnClick"/>
-            
+            <StackPanel Margin="10 0 10 0" Background="AliceBlue">
+                <CheckBox x:Name="EditCheckBox" IsThreeState="False"
+                          Margin="0 10 0 10"
+                          IsEnabled="{Binding Path=AppView.IsEditCheckBoxEnables}"
+                          IsChecked="{Binding Path=AppView.IsEditingEnable}" 
+                          Content="Перемещение точки" 
+                          PreviewMouseLeftButtonDown="EditCheckBox_OnPreviewMouseLeftButtonDown"
+                />
+                <CheckBox x:Name="PointPlacementCheckBox" IsThreeState="False"
+                          Margin="0 0 0 10"
+                          IsEnabled="{Binding Path=AppView.IsEditCheckBoxEnables}"
+                          IsChecked="{Binding Path=AppView.IsPointPlacementEnable}" 
+                          Content="Добавление точки" 
+                          PreviewMouseLeftButtonDown="PointPlacementCheckBox_OnPreviewMouseLeftButtonDown"
+                />
+                <Button Content="Завершить редактирование"
+                        Height="40"
+                        Background="SpringGreen"
+                        Name="StopEditButton"
+                        Click="StopEditButton_OnClick"/>
+            </StackPanel>
+                
+
         </StackPanel>
 
         <!-- OpenGLControl -->

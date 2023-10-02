@@ -19,6 +19,7 @@ public class PointsAppView : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+
     private ObservableCollection<PointsGroupView> _pointsGroup;
 
     public int CurrentGroupIndex
@@ -66,6 +67,56 @@ public class PointsAppView : INotifyPropertyChanged
         }
     }
     private string _state = "";
+
+    public bool CanUndo
+    {
+        get => _canUndo;
+        set
+        {
+            _canUndo = value;
+
+            OnPropertyChanged();
+        }
+    }
+    private bool _canUndo;
+
+    public bool CanRedo
+    {
+        get => _canRedo;
+        set
+        {
+            _canRedo = value;
+
+            OnPropertyChanged();
+        }
+    }
+    private bool _canRedo;
+
+    public bool IsEditingEnable
+    {
+        get => _isEditingEnable;
+        set
+        {
+            _isEditingEnable = value; 
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsEditCheckBoxEnables));
+        }
+    }
+    private bool _isEditingEnable;
+
+    public bool IsPointPlacementEnable
+    {
+        get => _isPointPlacementEnable;
+        set 
+        { 
+            _isPointPlacementEnable = value; 
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsEditCheckBoxEnables));
+        }
+    }
+    private bool _isPointPlacementEnable;
+
+    public bool IsEditCheckBoxEnables => IsEditingEnable || IsPointPlacementEnable;
 
     private readonly ListView _groupsTable;
     private readonly MainWindow _window;

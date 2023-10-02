@@ -21,8 +21,9 @@ public class RemoveGroupAction : PreviousStateMemorizedAction
 
     public override void Undo()
     {
-        App.PointContext.InsertGroupAt(_removedIndex, _removedGroup);
-
         base.Undo();
+
+        App.PointContext.InsertGroupAt(_removedIndex, _removedGroup);
+        App.PointContext.SelectGroup(_removedIndex);
     }
 }

@@ -17,9 +17,12 @@ public class PointsGroupView : INotifyPropertyChanged
         {
             _index = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(Number));
         }
     }
     private int _index;
+
+    public int Number => Index + 1;
 
     public Color Color
     {

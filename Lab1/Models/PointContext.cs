@@ -13,7 +13,12 @@ public class PointContext
     public PointsGroup? CurrentGroup => CurrentGroupIndex < 0
         ? null
         : _groups[CurrentGroupIndex];
-    public int CurrentGroupIndex { get; private set; }
+
+    public int CurrentGroupIndex
+    {
+        get;
+        private set;
+    }
 
     public Cursor Cursor { get; set; }
 
@@ -117,16 +122,28 @@ public class PointContext
 
     public void InsertGroupAt(int index, PointsGroup group)
     {
-        if (index < 0 || index >= _groups.Count)
+        if ((index < 0 || index >= _groups.Count) && (index != 0 && _groups.Count != 0))
         {
             throw new ArgumentOutOfRangeException();
         }
 
-        _groups.Insert(index, group);
-        _view.PointsGroup.Insert(index, new PointsGroupView(
-            group,
-            index
-        ));
+        if (index == 0 && _groups.Count == 0)
+        {
+            _groups.Add(group);
+            _view.PointsGroup.Add(new PointsGroupView(
+                group,
+                0
+            ));
+        }
+        else
+        {
+            _groups.Insert(index, group);
+            _view.PointsGroup.Insert(index, new PointsGroupView(
+                group,
+                index
+            ));
+        }
+        
 
         foreach (var groupView in _view.PointsGroup.Skip(index + 1))
         {
