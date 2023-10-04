@@ -154,7 +154,10 @@ public partial class MainWindow : Window
 
     private void ColorPicker_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        if (ColorPicker.SelectedColor != AppView.SelectedInTableGroup.Color && ColorPicker.SelectedColor is not null)
+        if (AppView.SelectedInTableGroup is not null &&
+            ColorPicker.SelectedColor is not null &&
+            ColorPicker.SelectedColor != AppView.SelectedInTableGroup.Color
+            )
         {
             PointsApp.PushAction(new ChangeColorAction(PointsApp, ColorPicker.SelectedColor.Value));
             PointsApp.ForceRender();

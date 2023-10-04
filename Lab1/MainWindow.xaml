@@ -48,18 +48,24 @@
                               Opened="ColorPicker_OnOpened"
             />
 
-            <Button Content="ОТМЕНА ПРЕДЫДУЩЕГО ДЕЙСТВИЯ" Margin="10" Height="40"
-                    IsEnabled="{Binding Path=AppView.CanUndo}"
-                    Click="UndoButton_OnClick"/>
-            <Button Content="ОТМЕНА ОТМЕНЫ ПРЕДЫДУЩЕГО ДЕЙСТВИЯ" Margin="10" Height="40"
-                    IsEnabled="{Binding Path=AppView.CanRedo}"
-                    Click="RedoButton_OnClick"/>
-
-            <Button Content="Удалить ТЕКУЩУЮ ВЫДЕЛЕННУЮ группу" Margin="10" Height="40"
-                    Name="RemoveButton"
-                    Click="RemoveButton_OnClick"/>
-
             <Button Margin="10" Height="40"
+                    IsEnabled="{Binding Path=AppView.CanUndo}"
+                    Click="UndoButton_OnClick">
+                <TextBlock Text="отмена предыдущего действия" TextWrapping="Wrap" TextAlignment="Center"/>
+            </Button>
+            <Button Margin="10" Height="40"
+                    IsEnabled="{Binding Path=AppView.CanRedo}"
+                    Click="RedoButton_OnClick">
+                <TextBlock Text="отмена отмены предыдущего действия" TextWrapping="Wrap" TextAlignment="Center"/>
+            </Button>
+
+                <Button Margin="10" Height="40"
+                    Name="RemoveButton"
+                    Click="RemoveButton_OnClick">
+                <TextBlock Text="Удалить текущую выделенную группу" TextWrapping="Wrap" TextAlignment="Center"/>
+            </Button>
+
+                <Button Margin="10" Height="40"
                     Name="ChangeEditModeButton"
                     Click="ChangeEditModeButton_OnClick"
                     >
